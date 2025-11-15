@@ -1,3 +1,10 @@
+@import url('https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.13/main.min.css');
+
+@import url('https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.13/main.min.css');
+
+/* Le reste de votre CSS... */
+
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
