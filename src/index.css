@@ -2,7 +2,6 @@
 
 @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.13/main.min.css');
 
-/* Le reste de votre CSS... */
 
 
 body {
@@ -17,4 +16,68 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+
+.fc-event {
+  border-radius: 5px;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.fc-event-google {
+  background-color: var(--event-color, #4285f4);
+  border: none;
+  color: white;
+}
+
+/* La superposition est autorisée comme Google Calendar */
+.fc-timegrid-event {
+  margin-left: 2px;
+  margin-right: 2px;
+  border: none;
+}
+
+/* Améliorer les événements sur le mois */
+.fc-daygrid-event {
+  border-radius: 4px;
+  padding: 3px;
+  font-size: 0.8rem;
+}
+
+/* Mieux espacer le calendrier */
+.fc {
+  --fc-daygrid-event-dot-width: 8px;
+}
+
+
+/* Fond clair comme Google Calendar */
+.fc {
+  font-family: "Roboto", sans-serif;
+}
+
+/* Couleurs et coins arrondis pour les événements */
+.fc-event {
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.fc-event-google {
+  background-color: var(--event-color, #4285f4);
+  color: white;
+  border: none;
+}
+
+/* Affichage des heures sur la colonne gauche */
+.fc-timegrid-axis {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Hauteur des créneaux plus lisible */
+.fc-timegrid-slot {
+  height: 30px; /* ou 20px pour plus compact */
 }
