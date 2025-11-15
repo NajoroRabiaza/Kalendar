@@ -8,13 +8,28 @@
 }
 
 .fc-timegrid-slot {
-  border-bottom: 1px solid #e6e6e6;
+  border-top: none !important;
+  border-bottom: none !important;
+  height: 30px !important;
+}
+
+.fc .fc-timegrid-slot-minor {
+  border-top: none !important;
+}
+
+.fc-timegrid-divider,
+.fc-timegrid-col {
+  border: none !important;
 }
 
 .fc-timegrid-slot-label {
   color: #5f6368;
   font-size: 12px;
   font-weight: 500;
+}
+
+.fc-timegrid-col {
+  background-color: #fafafa !important;
 }
 
 .google-event {
@@ -31,6 +46,30 @@
   padding-right: 4px;
 }
 
-.fc-timegrid-col {
-  background-color: #fafafa;
+.fc-timegrid-event {
+  margin-left: 2px;
+  margin-right: 2px;
+  border: none;
+}
+
+.fc-daygrid-event {
+  border-radius: 4px;
+  padding: 3px;
+  font-size: 0.8rem;
+}
+
+.fc {
+  font-family: "Roboto", sans-serif;
+}
+
+.fc-event {
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.fc-timegrid-axis {
+  font-size: 0.85rem;
+  color: #555;
 }

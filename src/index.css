@@ -81,3 +81,7 @@ code {
 .fc-timegrid-slot {
   height: 30px; /* ou 20px pour plus compact */
 }
+
+.fc.fc-media-screen .fc-timegrid-slot-minor {
+  border-top: none !important;
+}
