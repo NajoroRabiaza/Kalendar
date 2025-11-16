@@ -1,22 +1,20 @@
+/* === Import FullCalendar CSS (deja ailleurs donc on le commente) */
 /* @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.13/main.min.css');
    @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.13/main.min.css');
    @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.13/main.min.css'); */
 
+/* === Bordures globales === */
 .fc-theme-standard td,
 .fc-theme-standard th {
   border-color: #e0e0e0;
 }
 
-/* Supprimer lignes horaires (déjà ok) */
-/* Remettre les lignes horaires LOL..*/
+/* Supprimer lignes horaires (deja ok) */
 .fc-timegrid-slot {
-  border-top: 1px solid #e0e0e0 !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  height: 30px !important;
 }
-
-.fc-timegrid-slot-label {
-  border-right: 1px solid #e0e0e0 !important;
-}
-
 .fc .fc-timegrid-slot-minor {
   border-top: none !important;
 }
@@ -32,7 +30,7 @@
   font-weight: 500;
 }
 
-/* ArriEre-plan des colonnes */
+/* Arrière-plan des colonnes */
 .fc-timegrid-col {
   background-color: #fafafa !important;
 }
@@ -51,7 +49,7 @@
   border: none;
 }
 
-/* Amelioration  titre à l'intérieur */
+/* Améliore le titre à l'intérieur */
 .fc-event-title {
   padding-left: 4px;
   padding-right: 4px;
@@ -71,9 +69,9 @@
 .fc { font-family: "Roboto", sans-serif; }
 .fc-timegrid-axis { font-size: 0.85rem; color: #555; }
 
-/* --- Optionnel : styles par calendrier si on force via CSS (sans interférer) ---
+/* --- Optionnel : styles par calendrier si on veux forcer via CSS (sans interférer) ---
    Exemple : si il y a className 'groupeA' dans eventSources,
-  selon le choix : decommenter et adapter ces règles (elles n'utilisent PAS !important)
+   on décommente et adapte ces règles (elles n'utilisent PAS !important)
 .groupeA {
   background-color: #FF6B6B;
   border-color: #FF6B6B;
