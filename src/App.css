@@ -10,10 +10,9 @@
 }
 
 /* Supprimer lignes horaires (deja ok) */
+/* === Remet les lignes horaires === */
 .fc-timegrid-slot {
-  border-top: none !important;
-  border-bottom: none !important;
-  height: 30px !important;
+  border-top: 1px solid #e0e0e0 !important;
 }
 .fc .fc-timegrid-slot-minor {
   border-top: none !important;
