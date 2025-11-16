@@ -77,30 +77,45 @@ export default function App() {
       </div>
 
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, googleCalendarPlugin]}
-        initialView="timeGridWeek"
-        googleCalendarApiKey={API_KEY}
-        eventSources={eventSources}
-        locales={[frLocale]}
-        locale="fr"
-        headerToolbar={{
-          left: "prev,next today",
-          center: "title",
-          right: "dayGridMonth,timeGridWeek,timeGridDay",
-        }}
-        slotMinTime="06:00:00"
-        slotMaxTime="22:00:00"
-        allDaySlot={false}
-        height="auto"
-        expandRows={true}
-        handleWindowResize={true}
-        eventDidMount={handleEventDidMount} // fallback
+  plugins={[dayGridPlugin, timeGridPlugin, googleCalendarPlugin]}
+  initialView="timeGridWeek"
+  googleCalendarApiKey={API_KEY}
+  eventSources={eventSources}
+  locales={[frLocale]}
+  locale="fr"
+  headerToolbar={{
+    left: "prev,next today",
+    center: "title",
+    right: "dayGridMonth,timeGridWeek,timeGridDay",
+  }}
 
-        eventClick={(info) => {
-          info.jsEvent.preventDefault(); // empêche l'ouverture
-          return false; // empêche tout comportement
-        }}
-      />
+  /* --- Heures et slots --- */
+  slotMinTime="06:00:00"
+  slotMaxTime="22:00:00"
+  allDaySlot={false}
+  slotDuration="00:30:00"
+  slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+
+  /* --- Calendrier figé et scrollable --- */
+  height={800}             // hauteur fixe
+  contentHeight={800}      // hauteur contenu fixe
+  expandRows={false}       // ne pas ajuster les lignes automatiquement
+  handleWindowResize={false} // désactive la réactivité automatique
+  nowIndicator={true}       // optionnel : montre l'heure actuelle
+
+  /* --- Scroll horizontal pour mobile ou petit écran --- */
+  dayMaxEventRows={true}    // limite le nombre d'événements par cellule avec scroll interne
+
+  /* --- Gestion des couleurs des événements --- */
+  eventDidMount={handleEventDidMount} 
+
+  /* --- Empêcher l'ouverture des événements --- */
+  eventClick={(info) => {
+    info.jsEvent.preventDefault(); // empêche l'ouverture du lien Google Calendar
+    return false; // empêche tout comportement
+  }}
+/>
+
     </div>
   );
 }

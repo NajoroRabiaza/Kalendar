@@ -79,6 +79,18 @@
   font-size: 0.8rem;
 }
 
+/* Conteneur du calendrier scrollable */
+.fc {
+  overflow-x: auto; /* scroll horizontal si trop large */
+  overflow-y: auto; /* scroll vertical si trop haut */
+  min-width: 1000px; /* largeur minimum pour éviter que ça se rétrécisse */
+}
+
+/* Optionnel : fixer les colonnes pour que le texte reste lisible */
+.fc .fc-timegrid-col {
+  min-width: 120px; 
+}
+
 .fc { font-family: "Roboto", sans-serif; }
 .fc-timegrid-axis { font-size: 0.85rem; color: #555; }
 
