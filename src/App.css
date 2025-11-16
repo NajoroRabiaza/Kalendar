@@ -1,46 +1,57 @@
-@import url('https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.13/main.min.css');
-@import url('https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.13/main.min.css');
-@import url('https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.13/main.min.css');
+/* @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.13/main.min.css');
+   @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.13/main.min.css');
+   @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.13/main.min.css'); */
 
-.fc-theme-standard td, 
+.fc-theme-standard td,
 .fc-theme-standard th {
   border-color: #e0e0e0;
 }
 
+/* Supprimer lignes horaires (déjà ok) */
+/* Remettre les lignes horaires LOL..*/
 .fc-timegrid-slot {
-  border-top: none !important;
-  border-bottom: none !important;
-  height: 30px !important;
+  border-top: 1px solid #e0e0e0 !important;
+}
+
+.fc-timegrid-slot-label {
+  border-right: 1px solid #e0e0e0 !important;
 }
 
 .fc .fc-timegrid-slot-minor {
   border-top: none !important;
 }
-
 .fc-timegrid-divider,
 .fc-timegrid-col {
   border: none !important;
 }
 
+/* Labels d'heure */
 .fc-timegrid-slot-label {
   color: #5f6368;
   font-size: 12px;
   font-weight: 500;
 }
 
+/* ArriEre-plan des colonnes */
 .fc-timegrid-col {
   background-color: #fafafa !important;
 }
 
-.google-event {
+/* Style d'événements : mise en forme seulement. IMPORTANT : ne pas imposer background-color globalement ici. */
+.fc-event,
+.google-event,
+.fc-event-google {
   border-radius: 6px;
   padding: 4px;
-  color: white;
   font-size: 13px;
   font-weight: 500;
-  box-shadow: 0px 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0px 1px 3px rgba(0,0,0,0.12);
+  background-color: transparent;
+  color: inherit;
+  border: none;
 }
 
+/* Amelioration  titre à l'intérieur */
 .fc-event-title {
   padding-left: 4px;
   padding-right: 4px;
@@ -51,25 +62,31 @@
   margin-right: 2px;
   border: none;
 }
-
 .fc-daygrid-event {
   border-radius: 4px;
   padding: 3px;
   font-size: 0.8rem;
 }
 
-.fc {
-  font-family: "Roboto", sans-serif;
-}
+.fc { font-family: "Roboto", sans-serif; }
+.fc-timegrid-axis { font-size: 0.85rem; color: #555; }
 
-.fc-event {
-  border-radius: 4px;
-  padding: 2px 4px;
-  font-size: 0.85rem;
-  font-weight: 500;
+/* --- Optionnel : styles par calendrier si on force via CSS (sans interférer) ---
+   Exemple : si il y a className 'groupeA' dans eventSources,
+  selon le choix : decommenter et adapter ces règles (elles n'utilisent PAS !important)
+.groupeA {
+  background-color: #FF6B6B;
+  border-color: #FF6B6B;
+  color: white;
 }
-
-.fc-timegrid-axis {
-  font-size: 0.85rem;
-  color: #555;
+.groupeB {
+  background-color: #4ECDC4;
+  border-color: #4ECDC4;
+  color: white;
 }
+.groupeC {
+  background-color: #9B5DE5;
+  border-color: #9B5DE5;
+  color: white;
+}
+*/
