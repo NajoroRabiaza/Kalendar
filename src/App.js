@@ -95,6 +95,11 @@ export default function App() {
         expandRows={true}
         handleWindowResize={true}
         eventDidMount={handleEventDidMount} // fallback
+
+        eventClick={(info) => {
+          info.jsEvent.preventDefault(); // empêche l'ouverture
+          return false; // empêche tout comportement
+        }}
       />
     </div>
   );

@@ -48,6 +48,20 @@
   border: none;
 }
 
+
+.fc-event-title {
+  font-weight: 600;
+  font-size: 20px;
+  padding: 2px 4px;
+}
+
+.fc-event-time {
+  font-weight: 900;
+  font-size: 15px;
+}
+
+
+
 /* Améliore le titre à l'intérieur */
 .fc-event-title {
   padding-left: 4px;
