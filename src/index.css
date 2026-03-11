@@ -65,17 +65,6 @@ code {
   border: none;
 }
 
-/* Affichage des heures sur la colonne gauche */
-.fc-timegrid-axis {
-  font-size: 0.85rem;
-  color: #555;
-}
-
-/* Hauteur des créneaux plus lisible */
-.fc-timegrid-slot {
-  height: 30px; /* ou 20px pour plus compact */
-}
-
 .fc.fc-media-screen .fc-timegrid-slot-minor {
   border-top: none !important;
 }

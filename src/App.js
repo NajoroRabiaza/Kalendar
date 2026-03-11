@@ -76,45 +76,54 @@ export default function App() {
         ))}
       </div>
 
-      <FullCalendar
-  plugins={[dayGridPlugin, timeGridPlugin, googleCalendarPlugin]}
-  initialView="timeGridWeek"
-  googleCalendarApiKey={API_KEY}
-  eventSources={eventSources}
-  locales={[frLocale]}
-  locale="fr"
-  headerToolbar={{
-    left: "prev,next today",
-    center: "title",
-    right: "dayGridMonth,timeGridWeek,timeGridDay",
-  }}
+      <div style={{ padding: 16 }}>
+  <FullCalendar
+    plugins={[dayGridPlugin, timeGridPlugin, googleCalendarPlugin]}
+    initialView="timeGridWeek"
+    googleCalendarApiKey={API_KEY}
+    eventSources={eventSources}
+    locales={[frLocale]}
+    locale="fr"
+    headerToolbar={{
+      left: "prev,next today",
+      center: "title",
+      right: "dayGridMonth,timeGridWeek,timeGridDay",
+    }}
+    slotMinTime="06:00:00"
+    slotMaxTime="22:00:00"
+    allDaySlot={false}
+    slotDuration="00:30:00"
+    slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
 
-  /* --- Heures et slots --- */
-  slotMinTime="06:00:00"
-  slotMaxTime="22:00:00"
-  allDaySlot={false}
-  slotDuration="00:30:00"
-  slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+    // === hauteur fixe totale ===
+    height={16 * 50} // 16 heures × 40px = 640px
+    expandRows={false} // pas besoin
+    handleWindowResize={false} // désactive recalcul automatique
+    nowIndicator={true}
 
-  /* --- Calendrier figé et scrollable --- */
-  height={800}             // hauteur fixe
-  contentHeight={800}      // hauteur contenu fixe
-  expandRows={false}       // ne pas ajuster les lignes automatiquement
-  handleWindowResize={false} // désactive la réactivité automatique
-  nowIndicator={true}       // optionnel : montre l'heure actuelle
+    eventDidMount={handleEventDidMount}
+    eventClick={(info) => {
+      info.jsEvent.preventDefault();
+      return false;
+    }}
 
-  /* --- Scroll horizontal pour mobile ou petit écran --- */
-  dayMaxEventRows={true}    // limite le nombre d'événements par cellule avec scroll interne
+    /* ===================== NOM DU JOUR AU-DESSUS ===================== */
+  dayHeaderContent={ (args) => {
+    // args.date est un objet Date
+    const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    const nomJour = jours[args.date.getDay()];
+    const numeroJour = args.date.getDate();
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ fontWeight: "100", fontSize: "24px" }}>{nomJour}</div>
+        <div style={{ fontWeight: "700", fontSize: "28px" }}>{numeroJour}</div>
+      </div>
+    );
+  }
+  }
+  />
+</div>
 
-  /* --- Gestion des couleurs des événements --- */
-  eventDidMount={handleEventDidMount} 
-
-  /* --- Empêcher l'ouverture des événements --- */
-  eventClick={(info) => {
-    info.jsEvent.preventDefault(); // empêche l'ouverture du lien Google Calendar
-    return false; // empêche tout comportement
-  }}
-/>
 
     </div>
   );
