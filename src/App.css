@@ -1,229 +1,111 @@
-/* === Import FullCalendar CSS (deja ailleurs donc on le commente) */
-/* @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.13/main.min.css');
-   @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.13/main.min.css');
-   @import url('https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.13/main.min.css'); */
+/* === BASE === */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
 
-/* === Bordures globales === */
+.app-container {
+  padding: 10px;
+  max-width: 100%;
+}
+
+/* === EN-TÊTE === */
+.custom-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 12px;
+  font-weight: bold;
+  padding-bottom: 4px;
+  margin-bottom: 0;
+}
+.header-right { color: #333; font-weight: normal; }
+
+/* === BORDURE BLEUE AU-DESSUS DU CALENDRIER === */
+.calendar-wrapper {
+  border-top: 2px solid #a8cbff;
+}
+
+.fc { font-size: 11px; }
+
+/* === EN-TÊTES DES JOURS (Bandeau bleu en haut) === */
+.fc-theme-standard th {
+  background-color: #a8cbff !important;
+  border: 1px solid #ffffff !important;
+  padding: 2px 0 !important;
+}
+.fc-col-header-cell-cushion {
+  color: #004085 !important;
+  font-weight: normal !important;
+  text-decoration: none !important;
+}
+
+/* === COLONNE DES HEURES À GAUCHE (Fond bleu clair + Texte bleu) === */
+.fc-theme-standard .fc-timegrid-axis,
+.fc-theme-standard .fc-timegrid-slot-label {
+  background-color: #eef4ff !important; /* Fond bleu clair pour toute la colonne de gauche */
+  border-right: 1px solid #e0e0e0 !important;
+}
+
+.fc .fc-timegrid-slot-label-cushion {
+  color: #0033cc !important; /* Heures en bleu foncé */
+  font-size: 11px !important;
+  font-weight: normal !important;
+}
+
+/* === GRILLE DES HEURES ET POINTILLÉS === */
+/* Hauteur des lignes très fine pour tout voir sans scroller */
+.fc-timegrid-slot {
+  height: 15px !important; 
+}
+
+/* Ligne PLEINE pour les heures piles (07:00, 08:00...) */
+.fc-theme-standard tr.fc-timegrid-slot-label td {
+  border-top: 1px solid #b3b3b3 !important;
+}
+
+/* Lignes en POINTILLÉ pour les quarts d'heure (15, 30, 45) */
+.fc-theme-standard tr.fc-timegrid-slot-minor td {
+  border-top: 1px dashed #b3b3b3 !important; 
+}
+
+/* Lignes verticales de séparation entre les jours */
 .fc-theme-standard td,
 .fc-theme-standard th {
-  border-color: #e0e0e0;
+  border-right: 1px solid #e0e0e0 !important;
+  border-left: none !important;
 }
 
-/* Supprimer lignes horaires (deja ok) */
-/* === Remet les lignes horaires === */
-.fc-timegrid-slot {
-  border-top: 1px solid #e0e0e0 !important;
-}
-.fc .fc-timegrid-slot-minor {
-  border-top: none !important;
-}
-.fc-timegrid-divider,
-.fc-timegrid-col {
-  border: none !important;
-}
-
-.fc-timegrid-slot {
-
-  height: 40px !important; /* fixe la hauteur de chaque créneau */
-}
-.fc-timegrid-slots {
-  display: block !important; /* empêche FullCalendar d’étirer la grille */
-}
-
-
-/* Labels d'heure */
-.fc-timegrid-slot-label {
-  color: #5f6368;
-  font-size: 23px;
-  font-weight: 500;
-}
-
-/* Arrière-plan des colonnes */
-.fc-timegrid-col {
-  background-color: #fafafa !important;
-}
-
-/* Style d'événements : mise en forme seulement. IMPORTANT : ne pas imposer background-color globalement ici. */
-.fc-event,
-.google-event,
-.fc-event-google {
-  border-radius: 6px;
-  padding: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0px 1px 3px rgba(0,0,0,0.12);
-  background-color: transparent;
-  color: inherit;
-  border: none;
-}
-
-
-.fc-event-title {
-  font-weight: 600;
-  font-size: 20px;
-  padding: 2px 4px;
-}
-
-.fc-event-time {
-  font-weight: 900;
-  font-size: 15px;
-}
-
-
-
-/* Améliore le titre à l'intérieur */
-.fc-event-title {
-  padding-left: 4px;
-  padding-right: 4px;
-}
-
-.fc-timegrid-event {
-  margin-left: 2px;
-  margin-right: 2px;
-  border: none;
-}
-.fc-daygrid-event {
-  border-radius: 4px;
-  padding: 3px;
-  font-size: 0.8rem;
-}
-
-/* Conteneur du calendrier scrollable */
-.fc {
-  overflow-x: auto; /* scroll horizontal si trop large */
-  overflow-y: auto; /* scroll vertical si trop haut */
-  min-width: 1000px; /* largeur minimum pour éviter que ça se rétrécisse */
-}
-
-/* Optionnel : fixer les colonnes pour que le texte reste lisible */
-.fc .fc-timegrid-col {
-  min-width: 120px; 
-}
-
-.fc { font-family: "Roboto", sans-serif; }
-.fc-timegrid-axis { 
-  font-size: 0.85rem;
-  color: rgb(206, 19, 19);
-  /* Assurez-vous que cette taille est suffisante pour votre police de 16px */
-  width: 70px !important; 
-  min-width: 70px !important; 
-  text-align: right; /* Pour aligner l'heure sur la bordure de droite */
-  padding-right: 5px; /* Ajoutez un peu d'espace entre l'heure et la grille */
-}
-
-/* --- Optionnel : styles par calendrier si on veux forcer via CSS (sans interférer) ---
-   Exemple : si il y a className 'groupeA' dans eventSources,
-   on décommente et adapte ces règles (elles n'utilisent PAS !important)
-.groupeA {
-  background-color: #FF6B6B;
-  border-color: #FF6B6B;
-  color: white;
-}
-.groupeB {
-  background-color: #4ECDC4;
-  border-color: #4ECDC4;
-  color: white;
-}
-.groupeC {
-  background-color: #9B5DE5;
-  border-color: #9B5DE5;
-  color: white;
-}
-*/
-
-/* === STYLE GLOBAL "MODERNE" === */
-.fc {
-  background: #ffffff;
-  font-family: "Inter", "Roboto", sans-serif;
-  color: #333;
-}
-
-/* === GRILLE DU CALENDRIER (style Google-like) === */
-.fc-timegrid-slot,
-.fc-daygrid-day-frame {
-  transition: background 0.15s ease-in-out;
-}
-
-.fc-timegrid-slot:hover,
-.fc-daygrid-day-frame:hover {
-  background-color: #f5f7fa !important;
-}
-
-/* Bordures hyper fines */
-.fc-theme-standard td,
-.fc-theme-standard th {
-  border-color: #e5e7eb !important;
-}
-
-/* === STYLE DES ÉVÉNEMENTS (modern clone-like) === */
-.fc-event {
-  border-radius: 6px !important;
-  padding: 4px 6px !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
-  border: none !important;
-  color: #fff !important;
-}
-
-/* Titre interne amélioré */
-.fc-event-title {
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  margin-bottom: 2px;
-}
-
-/* Heure affichée dans la vue semaine/jour */
-.fc-event-time {
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  opacity: 0.9;
-}
-
-/* === HEADER MODERNE === */
-.fc-toolbar-title {
-  font-size: 22px !important;
-  font-weight: 700 !important;
-  color: #1a1a1a;
-}
-
-/* Boutons */
-.fc .fc-button {
-  background: #f3f4f6 !important;
-  color: #333 !important;
-  border: none !important;
-  border-radius: 6px !important;
-  font-weight: 600 !important;
+/* === EVENTS (BLOCS CARRÉS) === */
+.fc-timegrid-event-harness { margin: 0 !important; }
+.fc-v-event {
+  border-radius: 0 !important; /* Coins carrés */
+  border: 1px solid #ffffff !important; /* Contour blanc */
   box-shadow: none !important;
-  transition: background 0.15s ease-in-out;
+  padding: 2px !important;
+  margin: 0 !important;
 }
-
-.fc .fc-button:hover {
-  background: #e5e7eb !important;
-}
-
-.fc .fc-button-primary:not(:disabled).fc-button-active {
-  background: #2563eb !important;
+.fc-event-main {
   color: white !important;
+  padding: 0 !important;
 }
 
-
-/* === COLONNES === */
-.fc-timegrid-col {
-  background: #fafafa !important;
-  border-left: 1px solid #eee !important;
+.custom-event {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  gap: 2px;
+}
+.custom-event-title {
+  font-weight: bold;
+  font-size: 10px;
+  white-space: normal;
+  overflow: hidden;
+}
+.custom-event-time {
+  font-size: 9px;
+  font-weight: normal;
 }
 
-/* Enlever les bordures de droite des colonnes jour */
-.fc-timegrid-col-frame {
-  border-right: none !important;
+/* Retirer le fond jaune "Aujourd'hui" par défaut de FullCalendar */
+.fc-day-today {
+  background-color: transparent !important;
 }
-
-
-/* Nettoyage final : style ultra léger Google Calendar */
-.fc-scrollgrid,
-.fc-timegrid {
-  border: none !important;
-}
-
-
