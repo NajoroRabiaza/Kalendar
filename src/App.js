@@ -18,8 +18,26 @@ const CLASS_COLOR_MAP = calendarConfig.groups.reduce((acc, g) => {
 export default function App() {
   const [visible, setVisible] = useState(() => {
     const initial = {};
-    // On utilise calendarConfig.groups au lieu de SOURCES
-    calendarConfig.groups.forEach(g => (initial[g.id] = true));
+    
+    // 1. On va chercher ce qui est écrit dans l'URL (ex: ?group=groupeA)
+    const queryParams = new URLSearchParams(window.location.search);
+    
+    // 2. On extrait spécifiquement la valeur associée à "group"
+    const targetGroup = queryParams.get("group"); // targetGroup vaudra "groupeA", "groupeB", ou sera null
+
+    // 3. On boucle sur tous les groupes de notre fichier de configuration
+    calendarConfig.groups.forEach(g => {
+      if (targetGroup) {
+        // SCÉNARIO A : L'URL contient un groupe spécifique.
+        // Si l'ID du groupe actuel correspond à celui de l'URL, on met 'true' (visible), sinon 'false' (caché).
+        initial[g.id] = (g.id === targetGroup);
+      } else {
+        // SCÉNARIO B : L'URL est "normale" (http://localhost:3000/).
+        // On affiche tout par défaut.
+        initial[g.id] = true;
+      }
+    });
+    
     return initial;
   });
 
