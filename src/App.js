@@ -16,7 +16,7 @@ const CLASS_COLOR_MAP = calendarConfig.groups.reduce((acc, g) => {
 }, {});
 
 export default function App() {
-  const [visible, setVisible] = useState(() => {
+  const [visible] = useState(() => {
     const initial = {};
     
     // 1. On va chercher ce qui est écrit dans l'URL (ex: ?group=groupeA)
