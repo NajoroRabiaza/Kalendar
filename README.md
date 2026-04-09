@@ -12,7 +12,38 @@ Une application web interactive développée en React, conçue pour centraliser 
   - **Synchronisation Google Calendar :** Connexion directe et en temps réel à de multiples calendriers Google (par classes/groupes).
   - **Interface Visuelle Sur-Mesure :** Design industriel type "blocs pleins" pour une lecture immédiate des cours et des intervalles.
   - **Grille de Précision :** Affichage optimisé de 07h00 à 18h00 avec une granularité par quarts d'heure (lignes pleines pour les heures, pointillés pour les interlignes).
-  - **Filtrage Intelligent :** Possibilité de filtrer l'affichage par groupes (ex: H1, H4, G3) avec un code couleur strict.
+  - **Filtrage Intelligent par URL :** Possibilité d'isoler l'emploi du temps d'un groupe spécifique via un paramètre dynamique dans l'URL.
+  - **Intégration Transparente :** Conçu pour être intégré facilement comme widget iframe sur n'importe quel site web institutionnel.
+
+## Intégration Facile (Widget Iframe)
+
+L'un des grands atouts de ce projet est sa capacité à être intégré sur n'importe quel site web (WordPress, Moodle, site vitrine, etc.) sans aucune compétence en code, via une simple balise iframe.
+
+### 1. Afficher l'emploi du temps complet
+Copiez-collez ce code HTML dans votre page web :
+
+```html
+<iframe 
+  src="https://VOTRE_PROJET.vercel.app" 
+  width="100%" 
+  height="700px" 
+  style="border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" 
+  title="Emploi du temps">
+</iframe>
+```
+
+### 2. Filtrer par groupe spécifique
+Pour n'afficher que l'emploi du temps d'un groupe spécifique (par exemple le groupe "H4" dont l'ID est `groupeB`), ajoutez simplement `?group=groupeB` à la fin de l'URL :
+
+```html
+<iframe 
+  src="https://VOTRE_PROJET.vercel.app/?group=groupeB" 
+  width="100%" 
+  height="700px" 
+  style="border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" 
+  title="Emploi du temps - H4">
+</iframe>
+```
 
 ## Technologies Utilisées
 
@@ -20,20 +51,45 @@ Une application web interactive développée en React, conçue pour centraliser 
   - **Moteur de Calendrier :** [FullCalendar](https://fullcalendar.io/) (Modules `daygrid`, `timegrid`, `google-calendar`)
   - **Source de données :** API Google Calendar
 
+## Configuration Rapide (calendarConfig.js)
+
+Toutes les variables du projet sont centralisées pour faciliter la maintenance. Pour ajouter, modifier ou supprimer un groupe d'étudiants, ou pour changer le titre de l'école, éditez simplement le fichier `src/calendarConfig.js` :
+
+```javascript
+export const calendarConfig = {
+  apiKey: "VOTRE_CLE_API_GOOGLE_ICI",
+  header: {
+    prefix: "THE",
+    title: "Holidays in Madagascar",
+    dateText: "dim. 21 mai - sam. 27 mai 2023"
+  },
+  groups: [
+    { 
+      id: "groupeA", 
+      title: "H1", 
+      calendarId: "ID_DU_CALENDRIER_GOOGLE@group.calendar.google.com", 
+      color: "#0099ff" 
+    },
+    // Ajoutez d'autres groupes ici...
+  ]
+};
+```
+
+Assurez-vous que les calendriers Google cibles sont configurés en **"Public"** dans leurs paramètres de partage pour que l'API puisse récupérer les événements.
+
 ## Installation et Démarrage local
 
 ### Prérequis
 
   - [Node.js](https://nodejs.org/) (version 14 ou supérieure)
   - Un gestionnaire de paquets (npm ou yarn)
-  - Une clé d'API Google Calendar valide.
 
 ### Étapes d'installation
 
 1.  **Cloner le dépôt :**
 
     ```bash
-    git clone https://github.com/votre-nom/votre-projet-emploi-du-temps.git
+    git clone [https://github.com/votre-nom/votre-projet-emploi-du-temps.git](https://github.com/votre-nom/votre-projet-emploi-du-temps.git)
     cd votre-projet-emploi-du-temps
     ```
 
@@ -45,14 +101,8 @@ Une application web interactive développée en React, conçue pour centraliser 
     yarn install
     ```
 
-3.  **Configuration de la clé API Google :**
-    Ouvrez le fichier `src/App.js` et assurez-vous d'insérer votre clé API Google valide dans la constante prévue à cet effet :
-
-    ```javascript
-    const API_KEY = "VOTRE_CLE_API_GOOGLE_ICI";
-    ```
-
-    *(Note de sécurité : Pour une mise en production, il est recommandé de passer cette clé dans un fichier `.env` via `process.env.REACT_APP_GOOGLE_API_KEY`).*
+3.  **Configurer les données :**
+    Ouvrez le fichier `src/calendarConfig.js` et assurez-vous d'insérer votre clé API Google valide et vos identifiants de calendriers.
 
 4.  **Lancer le serveur de développement :**
 
@@ -62,25 +112,7 @@ Une application web interactive développée en React, conçue pour centraliser 
     yarn start
     ```
 
-    L'application sera accessible sur [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000).
-
-## Configuration des Calendriers (Groupes)
-
-Pour ajouter, modifier ou supprimer un groupe d'étudiants, éditez la constante `SOURCES` dans le fichier `src/App.js` :
-
-```javascript
-const SOURCES = [
-  { 
-    id: "groupeA", 
-    title: "H1", 
-    calendarId: "ID_DU_CALENDRIER_GOOGLE@group.calendar.google.com", 
-    color: "#0099ff" 
-  },
-  // Ajoutez d'autres groupes ici...
-];
-```
-
-Assurez-vous que les calendriers Google cibles sont configurés en **"Public"** dans leurs paramètres de partage pour que l'API puisse récupérer les événements.
+    L'application sera accessible sur http://localhost:3000.
 
 ## Architecture CSS et Design
 
@@ -94,3 +126,4 @@ Les modifications majeures se trouvent dans `src/App.css`.
 ## Licence
 
 Ce projet est sous licence MIT - voir le fichier [LICENSE.md](LICENSE.md) pour plus de détails.
+```
