@@ -40,7 +40,7 @@ export default function App() {
         for (const cls of Object.keys(CLASS_COLOR_MAP)) {
           if (info.el.classList.contains(cls)) {
             info.el.style.backgroundColor = CLASS_COLOR_MAP[cls];
-            info.el.style.borderColor = "white"; 
+            info.el.style.borderColor = "white";
             break;
           }
         }
@@ -51,7 +51,6 @@ export default function App() {
   const renderEventContent = (eventInfo) => {
     const start = eventInfo.event.start;
     const end = eventInfo.event.end;
-    
     const formatTime = (date) => {
       if (!date) return "";
       return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }).replace(':', ':');
@@ -71,17 +70,15 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* En-tête (texte) */}
       <div className="custom-calendar-header">
         <div className="header-left">
-          <span style={{ color: '#ffcc00' }}>HEI</span>, <span style={{ color: '#28a745' }}>Holidays in Madagascar</span>
+          <span style={{ color: '#ffcc00' }}>THE</span>, <span style={{ color: '#28a745' }}>Holidays in Madagascar</span>
         </div>
         <div className="header-right">
           dim. 21 mai - sam. 27 mai 2023 (Heure normale d'Afrique de l'Est)
         </div>
       </div>
 
-      {/* Calendrier */}
       <div className="calendar-wrapper">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, googleCalendarPlugin]}
@@ -91,7 +88,7 @@ export default function App() {
           locales={[frLocale]}
           locale="fr"
           headerToolbar={false}
-          firstDay={0} // Dimanche
+          firstDay={0}
           slotMinTime="07:00:00"
           slotMaxTime="18:00:00"
           allDaySlot={false}
