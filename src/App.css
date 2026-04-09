@@ -38,16 +38,11 @@ body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
   text-decoration: none !important;
 }
 
-/* === COLONNE DES HEURES À GAUCHE — aucune ligne, aucun trait === */
+/* === COLONNE DES HEURES À GAUCHE — aucune ligne horizontale === */
 .fc-theme-standard .fc-timegrid-axis,
 .fc-theme-standard .fc-timegrid-slot-label {
   background-color: #eef4ff !important;
-  border-right: 1px solid #e0e0e0 !important;
-  border-top: none !important;
-  border-bottom: none !important;
-}
-
-td.fc-timegrid-slot-label {
+  border-right: 1px solid #c0c0c0 !important; 
   border-top: none !important;
   border-bottom: none !important;
 }
@@ -63,26 +58,32 @@ td.fc-timegrid-slot-label {
   height: 22px !important;
 }
 
-/* === SUPPRIMER toutes les bordures par défaut sur les slots === */
-.fc-theme-standard td {
-  border: none !important;
+/* =========================================================
+   GESTION DES LIGNES HORIZONTALES DANS LA GRILLE
+   ========================================================= */
+
+/* 1. Par défaut, on nettoie les bordures basses pour ne gérer que le haut (border-top) */
+.fc-theme-standard td.fc-timegrid-slot-lane {
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
 }
 
-/* === TRAITS POINTILLÉS uniquement dans les colonnes de jours === */
-
-/* Trait pointillé fin pour TOUS les slots (heures + quarts) */
-.fc-timegrid-body tr td.fc-timegrid-slot-lane {
-  border-top: 1px dashed #c8c8c8 !important;
+/* 2. LIGNE CONTINUE par défaut pour toutes les cases (Ce qui dessinera les Heures Piles) */
+.fc .fc-timegrid-slot-lane {
+  border-top: 1px solid #999999 !important; 
 }
 
-/* Trait légèrement plus visible pour les heures piles */
-.fc-timegrid-body tr:not(.fc-timegrid-slot-minor) td.fc-timegrid-slot-lane {
-  border-top: 1px dashed #999999 !important;
+/* 3. LIGNES POINTILLÉES en surchargeant spécifiquement les cases des quarts d'heure (.fc-timegrid-slot-minor) */
+.fc td.fc-timegrid-slot-minor.fc-timegrid-slot-lane,
+.fc tr.fc-timegrid-slot-minor .fc-timegrid-slot-lane {
+  border-top: 1px dashed #cccccc !important;
 }
 
-/* Séparation verticale entre les jours */
+/* Séparation verticale continue entre les jours */
 .fc-theme-standard .fc-timegrid-col {
-  border-right: 1px solid #e0e0e0 !important;
+  border-right: 1px solid #d0d0d0 !important;
+  border-left: 1px solid #d0d0d0 !important;
 }
 
 /* === EVENTS (BLOCS CARRÉS) === */
