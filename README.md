@@ -1,5 +1,7 @@
 # Portail d'Emploi du Temps Universitaire
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/NajoroRabiaza/Kalendar)
+
 Une application web interactive développée en React, conçue pour centraliser et afficher les emplois du temps des étudiants en temps réel. Le système utilise l'API Google Calendar comme "Source de Vérité Unique", offrant une interface claire et sans ambiguïté pour les étudiants, tout en simplifiant drastiquement le travail administratif.
 
 ## Objectifs du Projet
