@@ -1,13 +1,76 @@
-/* === BASE === */
+/*
+   App.css
+   
+   SYSTÈME DE THÈMES via CSS Variables.
+   Toutes les couleurs passent par des variables définies ici.
+   Pour changer le thème, on change juste data-theme sur
+   le div.app-container dans App.js.
+   */
+
+
+/* 
+   THÈME CLAIR (défaut)
+    */
+.app-container[data-theme="light"] {
+  --bg-app:           #ffffff;
+  --bg-header:        #ffffff;
+  --bg-hour-col:      #eef4ff;
+  --bg-day-header:    #a8cbff;
+  --color-day-header: #004085;
+  --color-hour-label: #0033cc;
+  --color-header-right: #333333;
+  --border-calendar:  #a8cbff;
+  --border-hour:      1px solid #999999;
+  --border-quarter:   1px dashed #cccccc;
+  --border-col:       #d0d0d0;
+  --border-hour-col:  #c0c0c0;
+  --color-prefix:     #ffcc00;
+  --color-title:      #28a745;
+}
+
+/* 
+   THÈME SOMBRE  (?theme=dark dans l'URL)
+    */
+.app-container[data-theme="dark"] {
+  --bg-app:           #1a1a2e;
+  --bg-header:        #1a1a2e;
+  --bg-hour-col:      #16213e;
+  --bg-day-header:    #0f3460;
+  --color-day-header: #a8cbff;
+  --color-hour-label: #7eb8ff;
+  --color-header-right: #aaaaaa;
+  --border-calendar:  #0f3460;
+  --border-hour:      1px solid #444466;
+  --border-quarter:   1px dashed #333355;
+  --border-col:       #2a2a4a;
+  --border-hour-col:  #333355;
+  --color-prefix:     #ffcc00;
+  --color-title:      #4caf7d;
+}
+
+
+/*
+   BASE
+   */
 * { box-sizing: border-box; }
-body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
 
 .app-container {
   padding: 10px;
   max-width: 100%;
+  background-color: var(--bg-app);
+  /* Transition douce si on changeait le thème dynamiquement */
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* === EN-TÊTE === */
+
+/*
+   EN-TÊTE
+   */
 .custom-calendar-header {
   display: flex;
   justify-content: space-between;
@@ -16,78 +79,97 @@ body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
   font-weight: bold;
   padding-bottom: 4px;
   margin-bottom: 0;
+  background-color: var(--bg-header);
 }
-.header-right { color: #333; font-weight: normal; }
 
-/* === BORDURE BLEUE AU-DESSUS DU CALENDRIER === */
+.header-prefix { color: var(--color-prefix); }
+.header-title  { color: var(--color-title);  }
+.header-right  { color: var(--color-header-right); font-weight: normal; }
+
+
+/*
+   BORDURE AU-DESSUS DU CALENDRIER
+   */
 .calendar-wrapper {
-  border-top: 2px solid #a8cbff;
+  border-top: 2px solid var(--border-calendar);
 }
 
 .fc { font-size: 11px; }
 
-/* === EN-TÊTES DES JOURS (Bandeau bleu en haut) === */
+
+/*
+   EN-TÊTES DES JOURS (bandeau en haut)
+   */
 .fc-theme-standard th {
-  background-color: #a8cbff !important;
+  background-color: var(--bg-day-header) !important;
   border: 1px solid #ffffff !important;
   padding: 2px 0 !important;
 }
 .fc-col-header-cell-cushion {
-  color: #004085 !important;
+  color: var(--color-day-header) !important;
   font-weight: normal !important;
   text-decoration: none !important;
 }
 
-/* === COLONNE DES HEURES À GAUCHE — aucune ligne horizontale === */
+
+/*
+   COLONNE DES HEURES (à gauche)
+   */
 .fc-theme-standard .fc-timegrid-axis,
 .fc-theme-standard .fc-timegrid-slot-label {
-  background-color: #eef4ff !important;
-  border-right: 1px solid #c0c0c0 !important; 
+  background-color: var(--bg-hour-col) !important;
+  border-right: 1px solid var(--border-hour-col) !important;
   border-top: none !important;
   border-bottom: none !important;
 }
-
 .fc .fc-timegrid-slot-label-cushion {
-  color: #0033cc !important;
+  color: var(--color-hour-label) !important;
   font-size: 11px !important;
   font-weight: normal !important;
 }
 
-/* === HAUTEUR DES SLOTS === */
+
+/*
+   HAUTEUR DES SLOTS (créneaux de 15 min)
+   */
 .fc-timegrid-slot {
   height: 22px !important;
 }
 
-/* =========================================================
-   GESTION DES LIGNES HORIZONTALES DANS LA GRILLE
-   ========================================================= */
 
-/* 1. Par défaut, on nettoie les bordures basses pour ne gérer que le haut (border-top) */
+/*
+   LIGNES HORIZONTALES DE LA GRILLE
+   - Ligne pleine pour les heures piles
+   - Ligne pointillée pour les quarts d'heure (15, 30, 45)
+   */
 .fc-theme-standard td.fc-timegrid-slot-lane {
   border-bottom: none !important;
   border-left: none !important;
   border-right: none !important;
 }
-
-/* 2. LIGNE CONTINUE par défaut pour toutes les cases (Ce qui dessinera les Heures Piles) */
 .fc .fc-timegrid-slot-lane {
-  border-top: 1px solid #999999 !important; 
+  border-top: var(--border-hour) !important;
 }
-
-/* 3. LIGNES POINTILLÉES en surchargeant spécifiquement les cases des quarts d'heure (.fc-timegrid-slot-minor) */
 .fc td.fc-timegrid-slot-minor.fc-timegrid-slot-lane,
 .fc tr.fc-timegrid-slot-minor .fc-timegrid-slot-lane {
-  border-top: 1px dashed #cccccc !important;
+  border-top: var(--border-quarter) !important;
 }
 
-/* Séparation verticale continue entre les jours */
+
+/*
+   SÉPARATIONS VERTICALES ENTRE JOURS
+   */
 .fc-theme-standard .fc-timegrid-col {
-  border-right: 1px solid #d0d0d0 !important;
-  border-left: 1px solid #d0d0d0 !important;
+  border-right: 1px solid var(--border-col) !important;
+  border-left: 1px solid var(--border-col) !important;
 }
 
-/* === EVENTS (BLOCS CARRÉS) === */
+
+/*
+   ÉVÉNEMENTS (blocs colorés)
+   */
 .fc-timegrid-event-harness { margin: 0 !important; }
+
 .fc-v-event {
   border-radius: 0 !important;
   border: 1px solid #ffffff !important;
@@ -99,7 +181,6 @@ body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
   color: white !important;
   padding: 0 !important;
 }
-
 .custom-event {
   display: flex;
   flex-direction: column;
@@ -117,7 +198,33 @@ body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
   font-weight: normal;
 }
 
-/* Retirer le fond jaune "Aujourd'hui" par défaut de FullCalendar */
+
+/*
+   FOND "AUJOURD'HUI" — on désactive le jaune par défaut
+   */
 .fc-day-today {
   background-color: transparent !important;
+}
+
+
+/*
+   BOUTON FLOTTANT  (Widget Builder)
+   */
+.builder-fab-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+.builder-fab-button:hover {
+  background-color: #333;
 }

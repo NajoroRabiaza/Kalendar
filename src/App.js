@@ -4,55 +4,70 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import googleCalendarPlugin from "@fullcalendar/google-calendar";
 import frLocale from "@fullcalendar/core/locales/fr";
+import enLocale from "@fullcalendar/core/locales/en-gb";
 import "./App.css";
 
 import { calendarConfig } from "./calendarConfig";
-import WidgetBuilder from "./WidgetBuilder"; // <-- On importe notre nouveau composant !
+import WidgetBuilder from "./WidgetBuilder";
+import getUrlParams from "./getUrlParams"; // ← notre nouveau module
 
 export default function App() {
-  // État pour afficher/cacher le générateur de widget
   const [showBuilder, setShowBuilder] = useState(false);
-  
-  const queryParams = new URLSearchParams(window.location.search);
-  const calendarId = queryParams.get("calId") || calendarConfig.masterCalendarId;
-  const targetGroup = queryParams.get("show"); 
 
+  //  On lit UNE SEULE FOIS tous les paramètres URL ici.
+  //  Tout le reste de l'app utilise cet objet.
+  const urlParams = getUrlParams();
+
+  //  MAPPING DES COULEURS
+  //  On part de la config de base, puis on applique les
+  //  éventuelles surcharges venues de l'URL (?color1=...).
   const activeMapping = { ...calendarConfig.colorMapping };
-  for (let i = 1; i <= 11; i++) {
-    const urlColorLabel = queryParams.get(`color${i}`);
-    if (urlColorLabel) {
-      if (activeMapping[i]) {
-        activeMapping[i].label = urlColorLabel;
-      } else {
-        activeMapping[i] = { label: urlColorLabel, hex: "#000000" };
-      }
+  for (const [colorId, newLabel] of Object.entries(urlParams.colorOverrides)) {
+    if (activeMapping[colorId]) {
+      activeMapping[colorId] = { ...activeMapping[colorId], label: newLabel };
+    } else {
+      // Couleur inconnue dans la config → on la crée avec une couleur grise
+      activeMapping[colorId] = { label: newLabel, hex: "#888888" };
     }
   }
 
+  //  TITRE DE L'EN-TÊTE
+  //  Si ?title= est fourni dans l'URL, il prend le dessus
+  //  sur calendarConfig.header.title
+  const headerTitle = urlParams.title || calendarConfig.header.title;
+
+  //  TRANSFORMATION DES ÉVÉNEMENTS GOOGLE CALENDAR
+  //  Attribue couleur et groupe à chaque événement.
+  //  Retourner `false` = l'événement est masqué.
   const handleEventDataTransform = (eventData) => {
     const rawColorId = eventData.colorId || "default";
     const groupInfo = activeMapping[rawColorId] || activeMapping["default"];
 
-    if (targetGroup && groupInfo.label !== targetGroup) {
-      return false; 
+    // Filtre par groupe si ?show=NomDuGroupe est dans l'URL
+    if (urlParams.show && groupInfo.label !== urlParams.show) {
+      return false;
     }
 
     eventData.backgroundColor = groupInfo.hex;
-    eventData.borderColor = "white";
-    eventData.textColor = "white";
-    eventData.groupLabel = groupInfo.label; 
+    eventData.borderColor      = "white";
+    eventData.textColor        = "white";
+    eventData.groupLabel       = groupInfo.label;
 
     return eventData;
   };
 
+  //  RENDU PERSONNALISÉ D'UN ÉVÉNEMENT (contenu du bloc)
   const renderEventContent = (eventInfo) => {
-    const start = eventInfo.event.start;
-    const end = eventInfo.event.end;
+    const start      = eventInfo.event.start;
+    const end        = eventInfo.event.end;
     const groupLabel = eventInfo.event.extendedProps?.groupLabel || "G";
-    
+
     const formatTime = (date) => {
       if (!date) return "";
-      return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }).replace(':', ':');
+      return date.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     };
 
     return (
@@ -67,63 +82,83 @@ export default function App() {
     );
   };
 
-  return (
-    <div className="app-container">
-      {/* Si showBuilder est vrai, on affiche notre interface, sinon on la cache */}
-      {showBuilder && <WidgetBuilder onClose={() => setShowBuilder(false)} />}
+  //  RENDU DE L'EN-TÊTE DES JOURS (format "lun. 3/6")
+  const renderDayHeader = (args) => {
+    const jours = {
+      fr: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
+      en: ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
+      mg: ["Alah.", "Alats.", "Tal.", "Alar.", "Alak.", "Zom.", "Sab."],
+    };
+    const lang  = urlParams.lang;
+    const noms  = jours[lang] || jours["fr"];
+    const nomJour   = noms[args.date.getDay()];
+    const numJour   = args.date.getDate();
+    const mois      = args.date.getMonth() + 1;
+    return `${nomJour} ${numJour}/${mois}`;
+  };
 
+  //  CHOIX DES LOCALES FullCalendar
+  //  "mg" n'existe pas dans FullCalendar → on utilise "fr"
+  const fcLocales = [frLocale, enLocale];
+  const fcLocale  = urlParams.fcLocale; // "fr" ou "en"
+
+  //  RENDU PRINCIPAL
+  //  On applique data-theme sur le conteneur principal.
+  //  Le CSS utilise [data-theme="dark"] pour le thème sombre.
+  return (
+    <div className="app-container" data-theme={urlParams.theme}>
+
+      {/* Modale du Widget Builder (cachée si ?hideBuilder=true) */}
+      {showBuilder && (
+        <WidgetBuilder onClose={() => setShowBuilder(false)} />
+      )}
+
+      {/* En-tête */}
       <div className="custom-calendar-header">
         <div className="header-left">
-          <span style={{ color: '#ffcc00' }}>{calendarConfig.header.prefix}</span>, 
-          <span style={{ color: '#28a745' }}> {calendarConfig.header.title}</span>
+          <span className="header-prefix">{calendarConfig.header.prefix}</span>,{" "}
+          <span className="header-title">{headerTitle}</span>
         </div>
         <div className="header-right">
           {calendarConfig.header.dateText}
         </div>
       </div>
 
+      {/* Grille du calendrier */}
       <div className="calendar-wrapper">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, googleCalendarPlugin]}
           initialView="timeGridWeek"
-          googleCalendarApiKey={calendarConfig.apiKey} 
-          events={{ googleCalendarId: calendarId }}
+          googleCalendarApiKey={calendarConfig.apiKey}
+          events={{ googleCalendarId: urlParams.calId || calendarConfig.masterCalendarId }}
           eventDataTransform={handleEventDataTransform}
-          locales={[frLocale]}
-          locale="fr"
+          locales={fcLocales}
+          locale={fcLocale}
           headerToolbar={false}
-          firstDay={0}
-          slotMinTime="07:00:00"
-          slotMaxTime="18:00:00"
+          firstDay={1}
+          slotMinTime={urlParams.from}
+          slotMaxTime={urlParams.to}
+          hiddenDays={urlParams.hiddenDays}
           allDaySlot={false}
           slotDuration="00:15:00"
           slotLabelInterval="01:00:00"
-          slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+          slotLabelFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
           height="auto"
           expandRows={false}
-          dayHeaderContent={(args) => {
-            const jours = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
-            const nomJour = jours[args.date.getDay()];
-            const numeroJour = args.date.getDate();
-            const mois = args.date.getMonth() + 1;
-            return `${nomJour} ${numeroJour}/${mois}`;
-          }}
+          dayHeaderContent={renderDayHeader}
           eventContent={renderEventContent}
         />
       </div>
 
-      {/* Bouton flottant pour ouvrir le générateur */}
-      <button 
-        onClick={() => setShowBuilder(true)}
-        style={{
-          position: "fixed", bottom: "20px", right: "20px", padding: "15px 25px",
-          backgroundColor: "#000", color: "white", border: "none", borderRadius: "50px",
-          fontSize: "16px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-          zIndex: 1000
-        }}
-      >
-        ⚙️ Créer mon Widget
-      </button>
+      {/* Bouton flottant — caché si ?hideBuilder=true */}
+      {!urlParams.hideBuilder && (
+        <button
+          onClick={() => setShowBuilder(true)}
+          className="builder-fab-button"
+        >
+          ⚙️ Créer mon Widget
+        </button>
+      )}
     </div>
   );
 }
