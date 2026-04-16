@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -7,23 +7,19 @@ import frLocale from "@fullcalendar/core/locales/fr";
 import "./App.css";
 
 import { calendarConfig } from "./calendarConfig";
+import WidgetBuilder from "./WidgetBuilder"; // <-- On importe notre nouveau composant !
 
 export default function App() {
+  // État pour afficher/cacher le générateur de widget
+  const [showBuilder, setShowBuilder] = useState(false);
   
-  // 1. LECTURE DES PARAMÈTRES D'URL (Pour l'approche "Zéro Déploiement")
   const queryParams = new URLSearchParams(window.location.search);
-  
-  // On peut surcharger le calendrier entier via l'URL (?calId=xxx)
   const calendarId = queryParams.get("calId") || calendarConfig.masterCalendarId;
-  
-  // On récupère le filtre (quel groupe afficher ?) via l'URL (?show=H1)
   const targetGroup = queryParams.get("show"); 
 
-  // 2. CONSTRUCTION DE LA MATRICE ACTIVE
-  // On fusionne la config de base avec les potentielles modifications de l'URL
   const activeMapping = { ...calendarConfig.colorMapping };
   for (let i = 1; i <= 11; i++) {
-    const urlColorLabel = queryParams.get(`color${i}`); // Ex: ?color1=NouveauGroupe
+    const urlColorLabel = queryParams.get(`color${i}`);
     if (urlColorLabel) {
       if (activeMapping[i]) {
         activeMapping[i].label = urlColorLabel;
@@ -33,34 +29,25 @@ export default function App() {
     }
   }
 
-  // 3. LE MOTEUR DE FILTRAGE ET DE TRANSFORMATION
-  // Cette fonction intercepte les données brutes de Google AVANT de les afficher
   const handleEventDataTransform = (eventData) => {
-    // Récupération de l'ID de la couleur Google (ou "default" si non définie)
     const rawColorId = eventData.colorId || "default";
     const groupInfo = activeMapping[rawColorId] || activeMapping["default"];
 
-    // FILTRAGE : Si l'URL demande un groupe précis et que ça ne correspond pas, on annule l'affichage
     if (targetGroup && groupInfo.label !== targetGroup) {
-      return false; // L'événement est ignoré par FullCalendar
+      return false; 
     }
 
-    // TRANSFORMATION : On applique les bonnes couleurs et on injecte le nom du groupe
     eventData.backgroundColor = groupInfo.hex;
     eventData.borderColor = "white";
     eventData.textColor = "white";
-    // FullCalendar va automatiquement placer cette variable inconnue dans "extendedProps"
     eventData.groupLabel = groupInfo.label; 
 
     return eventData;
   };
 
-  // 4. PERSONNALISATION DE L'AFFICHAGE (HTML de chaque bloc)
   const renderEventContent = (eventInfo) => {
     const start = eventInfo.event.start;
     const end = eventInfo.event.end;
-    
-    // On récupère le label qu'on a injecté dans handleEventDataTransform
     const groupLabel = eventInfo.event.extendedProps?.groupLabel || "G";
     
     const formatTime = (date) => {
@@ -82,6 +69,9 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* Si showBuilder est vrai, on affiche notre interface, sinon on la cache */}
+      {showBuilder && <WidgetBuilder onClose={() => setShowBuilder(false)} />}
+
       <div className="custom-calendar-header">
         <div className="header-left">
           <span style={{ color: '#ffcc00' }}>{calendarConfig.header.prefix}</span>, 
@@ -97,15 +87,8 @@ export default function App() {
           plugins={[dayGridPlugin, timeGridPlugin, googleCalendarPlugin]}
           initialView="timeGridWeek"
           googleCalendarApiKey={calendarConfig.apiKey} 
-          
-          // SOURCE UNIQUE : On écoute uniquement le calendrier maître
-          events={{
-            googleCalendarId: calendarId
-          }}
-          
-          // Fonction magique qui filtre et colore à la volée
+          events={{ googleCalendarId: calendarId }}
           eventDataTransform={handleEventDataTransform}
-
           locales={[frLocale]}
           locale="fr"
           headerToolbar={false}
@@ -128,6 +111,19 @@ export default function App() {
           eventContent={renderEventContent}
         />
       </div>
+
+      {/* Bouton flottant pour ouvrir le générateur */}
+      <button 
+        onClick={() => setShowBuilder(true)}
+        style={{
+          position: "fixed", bottom: "20px", right: "20px", padding: "15px 25px",
+          backgroundColor: "#000", color: "white", border: "none", borderRadius: "50px",
+          fontSize: "16px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+          zIndex: 1000
+        }}
+      >
+        ⚙️ Créer mon Widget
+      </button>
     </div>
   );
 }
