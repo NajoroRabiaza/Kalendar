@@ -1,25 +1,49 @@
 /*
-   App.css
-   
-   SYSTÈME DE THÈMES via CSS Variables.
-   Toutes les couleurs passent par des variables définies ici.
-   Pour changer le thème, on change juste data-theme sur
-   le div.app-container dans App.js.
+   App.css — Système de thèmes à deux couches
+
+   COUCHE 1 : Variables publiques  (--cal-*)
+   Ce sont les variables que l'INTÉGRATEUR peut surcharger.
+   Elles ont des valeurs par défaut définies ici.
+   L'intégrateur peut les changer :
+     (a) via l'URL  :  ?primaryColor=%23ff0000
+     (b) via son CSS dans son propre site  :
+             .app-container { --cal-primary: #ff0000; }
+     (c) via un fichier CSS externe  :  ?cssUrl=https://...
+
+   COUCHE 2 : Variables internes  (--bg-*, --color-*, --border-*)
+   Ce sont les variables utilisées par les règles CSS du calendrier.
+   Elles lisent leur valeur depuis les variables publiques --cal-*.
+   L'intégrateur ne touche pas à ces variables directement.
+
+   PRIORITÉ CSS (du plus fort au plus faible) :
+   1. style="" en inline dans le HTML  ← URL params injectés par App.js
+   2. [data-theme="dark"] { --cal-* }  ← thème sombre
+   3. .app-container { --cal-* }       ← valeurs par défaut
    */
 
 
-/* 
-   THÈME CLAIR (défaut)
-    */
-.app-container[data-theme="light"] {
-  --bg-app:           #ffffff;
-  --bg-header:        #ffffff;
-  --bg-hour-col:      #eef4ff;
-  --bg-day-header:    #a8cbff;
-  --color-day-header: #004085;
+/*
+   VALEURS PAR DÉFAUT DES VARIABLES PUBLIQUES (thème clair)
+   */
+.app-container {
+  /* Variables publiques exposées à l'intégrateur */
+  --cal-primary:    #a8cbff;   /* Bandeau des jours (en-tête colonne) */
+  --cal-bg:         #ffffff;   /* Fond général de l'application       */
+  --cal-accent:     #eef4ff;   /* Colonne des heures à gauche         */
+  --cal-text:       #004085;   /* Texte dans le bandeau des jours     */
+  --cal-font:       Arial, Helvetica, sans-serif; /* Police            */
+
+  /* Variables internes qui lisent les variables publiques
+     C'est ici que la magie opère : si quelqu'un change --cal-primary,
+     tous les éléments qui en dépendent changent automatiquement.    */
+  --bg-app:           var(--cal-bg);
+  --bg-header:        var(--cal-bg);
+  --bg-day-header:    var(--cal-primary);
+  --bg-hour-col:      var(--cal-accent);
+  --color-day-header: var(--cal-text);
   --color-hour-label: #0033cc;
   --color-header-right: #333333;
-  --border-calendar:  #a8cbff;
+  --border-calendar:  var(--cal-primary);
   --border-hour:      1px solid #999999;
   --border-quarter:   1px dashed #cccccc;
   --border-col:       #d0d0d0;
@@ -28,24 +52,27 @@
   --color-title:      #28a745;
 }
 
-/* 
-   THÈME SOMBRE  (?theme=dark dans l'URL)
-    */
+
+/*
+   THÈME SOMBRE — surcharge uniquement les variables publiques.
+   Les variables internes se mettent à jour automatiquement
+   car elles lisent via var(--cal-*).
+   */
 .app-container[data-theme="dark"] {
-  --bg-app:           #1a1a2e;
-  --bg-header:        #1a1a2e;
-  --bg-hour-col:      #16213e;
-  --bg-day-header:    #0f3460;
-  --color-day-header: #a8cbff;
-  --color-hour-label: #7eb8ff;
+  --cal-primary:  #0f3460;
+  --cal-bg:       #1a1a2e;
+  --cal-accent:   #16213e;
+  --cal-text:     #a8cbff;
+
+  /* Variables internes spécifiques au thème sombre
+     (pas toutes couvertes par les variables publiques) */
+  --color-hour-label:   #7eb8ff;
   --color-header-right: #aaaaaa;
-  --border-calendar:  #0f3460;
-  --border-hour:      1px solid #444466;
-  --border-quarter:   1px dashed #333355;
-  --border-col:       #2a2a4a;
-  --border-hour-col:  #333355;
-  --color-prefix:     #ffcc00;
-  --color-title:      #4caf7d;
+  --border-hour:        1px solid #444466;
+  --border-quarter:     1px dashed #333355;
+  --border-col:         #2a2a4a;
+  --border-hour-col:    #333355;
+  --color-title:        #4caf7d;
 }
 
 
@@ -54,17 +81,15 @@
    */
 * { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-}
+body { margin: 0; }
 
 .app-container {
   padding: 10px;
   max-width: 100%;
   background-color: var(--bg-app);
-  /* Transition douce si on changeait le thème dynamiquement */
-  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: var(--cal-font);
+  /* Transition douce entre les changements de thème */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 
@@ -81,7 +106,6 @@ body {
   margin-bottom: 0;
   background-color: var(--bg-header);
 }
-
 .header-prefix { color: var(--color-prefix); }
 .header-title  { color: var(--color-title);  }
 .header-right  { color: var(--color-header-right); font-weight: normal; }
@@ -98,7 +122,7 @@ body {
 
 
 /*
-   EN-TÊTES DES JOURS (bandeau en haut)
+   BANDEAU DES JOURS (en-tête de colonne)
    */
 .fc-theme-standard th {
   background-color: var(--bg-day-header) !important;
@@ -130,7 +154,7 @@ body {
 
 
 /*
-   HAUTEUR DES SLOTS (créneaux de 15 min)
+   HAUTEUR DES CRÉNEAUX (15 min)
    */
 .fc-timegrid-slot {
   height: 22px !important;
@@ -139,8 +163,6 @@ body {
 
 /*
    LIGNES HORIZONTALES DE LA GRILLE
-   - Ligne pleine pour les heures piles
-   - Ligne pointillée pour les quarts d'heure (15, 30, 45)
    */
 .fc-theme-standard td.fc-timegrid-slot-lane {
   border-bottom: none !important;
@@ -166,10 +188,9 @@ body {
 
 
 /*
-   ÉVÉNEMENTS (blocs colorés)
+   ÉVÉNEMENTS
    */
 .fc-timegrid-event-harness { margin: 0 !important; }
-
 .fc-v-event {
   border-radius: 0 !important;
   border: 1px solid #ffffff !important;
@@ -177,38 +198,20 @@ body {
   padding: 2px !important;
   margin: 0 !important;
 }
-.fc-event-main {
-  color: white !important;
-  padding: 0 !important;
-}
-.custom-event {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-  gap: 2px;
-}
-.custom-event-title {
-  font-weight: bold;
-  font-size: 10px;
-  white-space: normal;
-  overflow: hidden;
-}
-.custom-event-time {
-  font-size: 9px;
-  font-weight: normal;
-}
+.fc-event-main { color: white !important; padding: 0 !important; }
+.custom-event  { display: flex; flex-direction: column; line-height: 1.1; gap: 2px; }
+.custom-event-title { font-weight: bold; font-size: 10px; white-space: normal; overflow: hidden; }
+.custom-event-time  { font-size: 9px; font-weight: normal; }
 
 
 /*
    FOND "AUJOURD'HUI" — on désactive le jaune par défaut
    */
-.fc-day-today {
-  background-color: transparent !important;
-}
+.fc-day-today { background-color: transparent !important; }
 
 
 /*
-   BOUTON FLOTTANT  (Widget Builder)
+   BOUTON FLOTTANT Widget Builder
    */
 .builder-fab-button {
   position: fixed;
@@ -225,6 +228,31 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   z-index: 1000;
 }
-.builder-fab-button:hover {
-  background-color: #333;
-}
+.builder-fab-button:hover { background-color: #333; }
+
+
+/*
+   GUIDE POUR LES INTÉGRATEURS
+   Si votre site embarque ce calendrier en iframe, vous ne
+   pouvez pas injecter du CSS directement dans l'iframe
+   (restriction de sécurité du navigateur).
+   
+   Utilisez plutôt ces paramètres URL :
+     ?primaryColor=%23a8cbff     (bandeau des jours)
+     ?bgColor=%23ffffff          (fond)
+     ?accentColor=%23eef4ff      (colonne heures)
+     ?textColor=%23004085        (texte bandeau)
+     ?fontFamily=Roboto          (police)
+     ?cssUrl=https://monsite.com/mon-calendrier.css  (CSS complet)
+   
+   Si vous intégrez directement le composant React (non-iframe),
+   vous pouvez surcharger les variables publiques dans votre CSS :
+   
+     .app-container {
+       --cal-primary:  #yourcolor;
+       --cal-bg:       #yourcolor;
+       --cal-accent:   #yourcolor;
+       --cal-text:     #yourcolor;
+       --cal-font:     'Your Font', sans-serif;
+     }
+   */
