@@ -10,8 +10,12 @@ import "./App.css";
 import { calendarConfig } from "./calendarConfig";
 import WidgetBuilder from "./WidgetBuilder";
 import getUrlParams from "./getUrlParams";
+import DocsPage from "./DocsPage";
 
 export default function App() {
+  // Routing minimal : ?docs=1 → page de documentation
+  const isDocsPage = new URLSearchParams(window.location.search).get("docs") === "1";
+  if (isDocsPage) return <DocsPage />;
   const [showBuilder, setShowBuilder] = useState(false);
 
   //  Lecture unique de tous les paramètres URL
@@ -184,6 +188,11 @@ export default function App() {
         >
           Creer mon Widget
         </button>
+      )}
+      {!urlParams.hideBuilder && (
+        <a href="/?docs=1" className="docs-fab-link">
+          📄 Docs
+        </a>
       )}
     </div>
   );
