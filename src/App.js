@@ -13,14 +13,24 @@ import getUrlParams from "./getUrlParams";
 import DocsPage from "./DocsPage";
 
 export default function App() {
-  // Routing minimal : ?docs=1 → page de documentation
-  const isDocsPage = new URLSearchParams(window.location.search).get("docs") === "1";
-  if (isDocsPage) return <DocsPage />;
+  // --------------------------------------------------------
+  //  RÈGLE FONDAMENTALE DE REACT :
+  //  Tous les hooks (useState, useEffect...) doivent être
+  //  appelés INCONDITIONNELLEMENT, tout en haut du composant,
+  //  avant tout return anticipé. C'est la "Rules of Hooks".
+  //  Si on met un return avant un hook, React ne peut plus
+  //  garantir que les hooks sont appelés dans le même ordre
+  //  à chaque rendu → erreur de compilation.
+  // --------------------------------------------------------
+
   const [showBuilder, setShowBuilder] = useState(false);
 
   //  Lecture unique de tous les paramètres URL
   const urlParams = getUrlParams();
 
+  // Routing minimal : ?docs=1 → page de documentation
+  // On lit le param AVANT les hooks mais on effectue le return APRÈS.
+  const isDocsPage = new URLSearchParams(window.location.search).get("docs") === "1";
 
   //  POINT 4 — INJECTION DE LA FEUILLE CSS EXTERNE
   //  Si ?cssUrl=https://... est fourni dans l'URL, on crée
@@ -55,6 +65,13 @@ export default function App() {
       if (l) l.remove();
     };
   }, [urlParams.cssUrl]); // se re-déclenche uniquement si cssUrl change
+
+  // --------------------------------------------------------
+  //  Return anticipé APRÈS tous les hooks — c'est ici la
+  //  bonne place. Tous les hooks ont déjà été appelés
+  //  inconditionnellement au-dessus, donc React est content.
+  // --------------------------------------------------------
+  if (isDocsPage) return <DocsPage />;
 
 
   //  POINT 4 — CONSTRUCTION DES STYLES INLINE (CSS VARIABLES)
