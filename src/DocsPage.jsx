@@ -199,20 +199,17 @@ export default function DocsPage() {
     {
       id: "html",
       label: "HTML / Site statique",
-      icon: "🌐",
       code: iframeCode,
     },
     {
       id: "wordpress",
       label: "WordPress",
-      icon: "🔵",
       code: `<!-- Dans un bloc HTML personnalisé ou widget texte -->
 ${iframeCode}`,
     },
     {
       id: "moodle",
       label: "Moodle",
-      icon: "🎓",
       code: `<!-- Dans un bloc HTML ou une page de cours Moodle -->
 <!-- Activez d'abord : Sécurité > Balises HTML autorisées -->
 ${iframeCode}`,
@@ -220,7 +217,6 @@ ${iframeCode}`,
     {
       id: "notion",
       label: "Notion",
-      icon: "⬛",
       code: `/* Notion ne supporte pas les iframes directement.
    Utilisez un service comme notion.so/embed ou
    copiez simplement le lien direct dans un bloc /embed */
@@ -230,7 +226,6 @@ ${generatedUrl}`,
     {
       id: "react",
       label: "React",
-      icon: "⚛️",
       code: `// Dans votre composant React
 export default function MonPage() {
   return (
@@ -247,7 +242,6 @@ export default function MonPage() {
     {
       id: "vue",
       label: "Vue.js",
-      icon: "💚",
       code: `<!-- Dans votre template Vue -->
 <template>
   <iframe
@@ -271,7 +265,6 @@ export default function MonPage() {
       {/* ── NAV ── */}
       <nav className="docs-nav">
         <div className="docs-nav-brand">
-          <span className="docs-nav-logo">📅</span>
           <span>Kalendar</span>
           <span className="docs-nav-badge">docs</span>
         </div>
