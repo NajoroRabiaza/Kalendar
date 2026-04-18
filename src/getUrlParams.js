@@ -116,7 +116,7 @@ function getUrlParams() {
   // virgules, apostrophes et tirets — ce qui couvre toutes
   // les polices CSS valides (ex: "Roboto", "Open Sans", etc.)
   // On refuse tout caractère dangereux (;, {, }, etc.)
-  const FONT_REGEX = /^[a-zA-Z0-9\s,'\-]+$/;
+  const FONT_REGEX = /^[a-zA-Z0-9\s,'-]+$/;
   const rawFont  = get("fontFamily", null);
   const fontFamily = rawFont && FONT_REGEX.test(rawFont) ? rawFont : null;
 
