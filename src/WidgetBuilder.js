@@ -104,6 +104,49 @@ export default function WidgetBuilder({ onClose }) {
   };
 
   
+  //  EXEMPLE D'INTEGRATION POSTMESSAGE
+  //  Ce code est destine a etre copie par le developpeur
+  //  qui integre le widget dans sa page parente.
+  //  Il illustre : reference a l'iframe, envoi d'une commande,
+  //  et ecoute de la confirmation.
+  const postMessageExample = `<!-- 1. L'iframe dans votre page HTML -->
+<iframe
+  id="mon-calendrier"
+  src="${generatedUrl}"
+  width="100%"
+  height="600px"
+  style="border:none;"
+  title="Emploi du temps"
+></iframe>
+
+<script>
+  // 2. Reference a l'iframe
+  const iframe = document.getElementById("mon-calendrier");
+
+  // 3. Attendre que l'iframe soit chargee avant d'envoyer des commandes
+  iframe.addEventListener("load", function () {
+
+    // Changer le groupe affiche
+    iframe.contentWindow.postMessage(
+      { type: "KALENDAR_CMD", action: "SET_GROUP", value: "H2" },
+      "*"
+    );
+
+    // Passer en mode sombre
+    iframe.contentWindow.postMessage(
+      { type: "KALENDAR_CMD", action: "SET_THEME", value: "dark" },
+      "*"
+    );
+  });
+
+  // 4. Ecouter les confirmations du widget
+  window.addEventListener("message", function (event) {
+    if (event.data && event.data.type === "KALENDAR_ACK") {
+      console.log("Commande executee :", event.data.action, "->", event.data.value);
+    }
+  });
+<\/script>`;
+
   //  RENDU
   return (
     <div style={styles.overlay}>
@@ -292,6 +335,57 @@ export default function WidgetBuilder({ onClose }) {
           </div>
           <textarea readOnly value={iframeCode} style={styles.textarea} onClick={e => e.target.select()} />
         </div>
+
+        {/*
+            INTEGRATION AVANCEE : postMessage API
+            Cette section explique au developpeur comment
+            controler le widget dynamiquement depuis la page
+            parente, sans recharger l'iframe.
+        */}
+        <Section titre="Integration avancee : controle dynamique (postMessage)">
+          <p style={{ margin: "0 0 10px", color: "#555", fontSize: "12px", lineHeight: "1.6" }}>
+            Une fois l'iframe integree dans votre page, vous pouvez lui envoyer des commandes
+            JavaScript sans la recharger. Copiez l'exemple ci-dessous dans votre page parente.
+          </p>
+
+          <div style={{ marginBottom: "10px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <span style={{ fontSize: "12px", fontWeight: "bold", color: "#333" }}>
+                Exemple complet d'integration
+              </span>
+              <button id="btn-postmsg" onClick={() => copier(postMessageExample, "btn-postmsg")} style={styles.copyBtn}>
+                Copier
+              </button>
+            </div>
+            <textarea
+              readOnly
+              value={postMessageExample}
+              style={{ ...styles.textarea, height: "220px" }}
+              onClick={e => e.target.select()}
+            />
+          </div>
+
+          <div style={{ backgroundColor: "#f0f7ff", border: "1px solid #b3d4ff", borderRadius: "6px", padding: "12px", fontSize: "11px", lineHeight: "1.7" }}>
+            <strong style={{ display: "block", marginBottom: "6px", color: "#003d99" }}>
+              Commandes disponibles :
+            </strong>
+            <code style={{ display: "block", marginBottom: "3px" }}>
+              {`{ type: "KALENDAR_CMD", action: "SET_GROUP", value: "H1" }`}
+            </code>
+            <code style={{ display: "block", marginBottom: "3px" }}>
+              {`{ type: "KALENDAR_CMD", action: "SET_THEME", value: "dark" | "light" }`}
+            </code>
+            <code style={{ display: "block", marginBottom: "8px" }}>
+              {`{ type: "KALENDAR_CMD", action: "SET_LANG",  value: "fr" | "en" | "mg" }`}
+            </code>
+            <strong style={{ display: "block", marginBottom: "6px", color: "#003d99" }}>
+              Confirmation recue depuis le widget (KALENDAR_ACK) :
+            </strong>
+            <code style={{ display: "block" }}>
+              {`{ type: "KALENDAR_ACK", action, value, ok: true | false }`}
+            </code>
+          </div>
+        </Section>
 
       </div>
     </div>

@@ -20,7 +20,7 @@ export default function App() {
   //  avant tout return anticipé. C'est la "Rules of Hooks".
   //  Si on met un return avant un hook, React ne peut plus
   //  garantir que les hooks sont appelés dans le même ordre
-  //  à chaque rendu → erreur de compilation.
+  //  à chaque rendu = erreur de compilation.
   // --------------------------------------------------------
 
   const [showBuilder, setShowBuilder] = useState(false);
@@ -28,7 +28,19 @@ export default function App() {
   //  Lecture unique de tous les paramètres URL
   const urlParams = getUrlParams();
 
-  // Routing minimal : ?docs=1 → page de documentation
+  // ----------------------------------------------------------
+  //  postMessage API
+  //  Ces trois states permettent au site parent de changer
+  //  dynamiquement le groupe affiche, le theme et la langue
+  //  SANS recharger l'iframe. La valeur initiale vient de
+  //  l'URL (?show=H1) ; elle peut ensuite etre ecrasee par
+  //  un message postMessage de la page parente.
+  // ----------------------------------------------------------
+  const [dynamicShow,  setDynamicShow]  = useState(urlParams.show);
+  const [dynamicTheme, setDynamicTheme] = useState(urlParams.theme);
+  const [dynamicLang,  setDynamicLang]  = useState(urlParams.lang);
+
+  // Routing minimal : ?docs=1 = page de documentation
   // On lit le param AVANT les hooks mais on effectue le return APRÈS.
   const isDocsPage = new URLSearchParams(window.location.search).get("docs") === "1";
 
@@ -65,6 +77,99 @@ export default function App() {
       if (l) l.remove();
     };
   }, [urlParams.cssUrl]); // se re-déclenche uniquement si cssUrl change
+
+  // ----------------------------------------------------------
+  //  postMessage : ECOUTE DES COMMANDES DU SITE PARENT
+  //
+  //  Principe :
+  //  La page parente (qui integre l'iframe) peut appeler
+  //  iframeElement.contentWindow.postMessage(payload, "*")
+  //  Le widget ecoute via window.addEventListener("message").
+  //
+  //  Format attendu du message :
+  //  { type: "KALENDAR_CMD", action: "SET_GROUP", value: "H2" }
+  //  { type: "KALENDAR_CMD", action: "SET_THEME", value: "dark" }
+  //  { type: "KALENDAR_CMD", action: "SET_LANG",  value: "en"   }
+  //
+  //  Securite :
+  //  On n'accepte que les messages dont le type vaut exactement
+  //  "KALENDAR_CMD". Cela evite de reagir aux messages d'autres
+  //  scripts (ex : extensions navigateur, bibliotheques tierces).
+  //  On valide aussi chaque valeur avant de l'appliquer.
+  //
+  //  Confirmation :
+  //  Apres chaque commande reussie, on repond a la page parente
+  //  via window.parent.postMessage(...) avec un ACK contenant
+  //  l'action executee et la valeur finale appliquee.
+  //  Cela permet au parent de savoir si sa commande a ete prise
+  //  en compte, et quelle valeur est desormais active.
+  // ----------------------------------------------------------
+  useEffect(() => {
+    const THEMES_VALIDES = ["light", "dark"];
+    const LANGUES_VALIDES = ["fr", "en", "mg"];
+
+    const handleMessage = (event) => {
+      // On ignore tout message qui n'a pas notre type propriétaire
+      if (!event.data || event.data.type !== "KALENDAR_CMD") return;
+
+      const { action, value } = event.data;
+
+      let applied = false;
+      let finalValue = value;
+
+      if (action === "SET_GROUP") {
+        // value peut etre une chaine (ex: "H2") ou null/"" pour tout afficher
+        const groupe = typeof value === "string" ? value.trim().slice(0, 30) : "";
+        setDynamicShow(groupe || null);
+        finalValue = groupe || null;
+        applied = true;
+      } else if (action === "SET_THEME") {
+        if (THEMES_VALIDES.includes(value)) {
+          setDynamicTheme(value);
+          applied = true;
+        }
+      } else if (action === "SET_LANG") {
+        if (LANGUES_VALIDES.includes(value)) {
+          setDynamicLang(value);
+          applied = true;
+        }
+      }
+
+      // Envoi de la confirmation (ACK) vers la page parente
+      // window.parent === window si on n'est pas dans une iframe,
+      // ce qui est inoffensif (on s'envoie le message a soi-meme).
+      if (applied) {
+        window.parent.postMessage(
+          {
+            type: "KALENDAR_ACK",
+            action,
+            value: finalValue,
+            ok: true,
+          },
+          "*"
+        );
+      } else {
+        // Commande inconnue ou valeur invalide : on signale l'echec
+        window.parent.postMessage(
+          {
+            type: "KALENDAR_ACK",
+            action,
+            value,
+            ok: false,
+            reason: "Action inconnue ou valeur invalide",
+          },
+          "*"
+        );
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    // Nettoyage : on retire le listener quand le composant est démonté
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []); // [] = ne s'execute qu'une seule fois, au montage
 
   // --------------------------------------------------------
   //  Return anticipé APRÈS tous les hooks — c'est ici la
@@ -115,7 +220,10 @@ export default function App() {
     const rawColorId = eventData.colorId || "default";
     const groupInfo  = activeMapping[rawColorId] || activeMapping["default"];
 
-    if (urlParams.show && groupInfo.label !== urlParams.show) return false;
+    // On utilise dynamicShow (etat React) plutot que urlParams.show
+    // pour que les changements via postMessage soient pris en compte
+    // sans recharger la page.
+    if (dynamicShow && groupInfo.label !== dynamicShow) return false;
 
     eventData.backgroundColor = groupInfo.hex;
     eventData.borderColor     = "white";
@@ -146,7 +254,8 @@ export default function App() {
       en: ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
       mg: ["Alah.", "Alats.", "Tal.", "Alar.", "Alak.", "Zom.", "Sab."],
     };
-    const noms = jours[urlParams.lang] || jours["fr"];
+    // dynamicLang peut avoir ete change par postMessage SET_LANG
+    const noms = jours[dynamicLang] || jours["fr"];
     return `${noms[args.date.getDay()]} ${args.date.getDate()}/${args.date.getMonth() + 1}`;
   };
 
@@ -158,7 +267,7 @@ export default function App() {
   return (
     <div
       className="app-container"
-      data-theme={urlParams.theme}
+      data-theme={dynamicTheme}
       style={inlineVars}
     >
       {showBuilder && (
@@ -181,7 +290,7 @@ export default function App() {
           events={{ googleCalendarId: urlParams.calId || calendarConfig.masterCalendarId }}
           eventDataTransform={handleEventDataTransform}
           locales={[frLocale, enLocale]}
-          locale={urlParams.fcLocale}
+          locale={dynamicLang === "mg" ? "fr" : dynamicLang}
           headerToolbar={false}
           firstDay={1}
           slotMinTime={urlParams.from}
@@ -208,7 +317,7 @@ export default function App() {
       )}
       {!urlParams.hideBuilder && (
         <a href="/?docs=1" className="docs-fab-link">
-          📄 Docs
+          Docs
         </a>
       )}
     </div>
