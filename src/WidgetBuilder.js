@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 //  WidgetBuilder.js
 //  Interface de génération du widget avec tous les paramètres,
-//  y compris la personnalisation des couleurs (Point 4).
+//  y compris la personnalisation des couleurs (Point 4)
+//  et l'apercu en direct du rendu (Point 7).
 
 export default function WidgetBuilder({ onClose }) {
 
@@ -25,13 +26,7 @@ export default function WidgetBuilder({ onClose }) {
   const [color2, setColor2] = useState("");
   const [color3, setColor3] = useState("");
 
-
   //  POINT 4 — Couleurs personnalisées
-  //  On stocke les couleurs comme hex (#aabbcc).
-  //  L'input type="color" retourne toujours un hex 6 chiffres.
-  //  activerX = true signifie que l'utilisateur veut
-  //  surcharger cette couleur (sinon on laisse le défaut).
-
   const [activerPrimary,setActiverPrimary]= useState(false);
   const [activerBg,setActiverBg]= useState(false);
   const [activerAccent,setActiverAccent]= useState(false);
@@ -43,9 +38,39 @@ export default function WidgetBuilder({ onClose }) {
   const [accentColor,setAccentColor]= useState("#eef4ff");
   const [textColor,setTextColor]= useState("#004085");
   const [fontFamily,setFontFamily]= useState("Arial");
- 
+
   // POINT 4 — CSS externe
   const [cssUrl, setCssUrl] = useState("");
+
+  //  POINT 7 — APERCU EN DIRECT
+  //
+  //  Deux états distincts :
+  //  showPreview : booleen — true = le panneau apercu est
+  //   visible dans la modale.
+  //
+  //  previewUrl : string — l'URL figee au moment ou
+  //   l'utilisateur a clique sur "Actualiser".
+  //   On ne pointe PAS directement sur generatedUrl
+  //   dans le src de l'iframe pour deux raisons :
+  //
+  //  1. Chaque frappe dans un champ recalcule generatedUrl,
+  //     ce qui declencherait un rechargement complet de l'iframe
+  //     a chaque caractere tape. C'est lent et perturbant.
+  //
+  //  2. L'utilisateur veut voir le resultat final QUAND il est
+  //     pret, pas a mi-chemin de sa saisie. Le bouton
+  //     "Actualiser" est l'intention explicite.
+  //
+  //  Quand l'utilisateur clique "Apercu en direct" ou
+  //  "Actualiser l'apercu", on copie generatedUrl dans
+  //  previewUrl. L'iframe recharge alors avec la nouvelle URL.
+  //  On force ce rechargement via la prop key={previewUrl} :
+  //  React detruit et recrée l'iframe quand la key change,
+  //  garantissant un chargement propre meme si l'URL de base
+  //  est identique mais les params changent.
+  const [showPreview, setShowPreview]   = useState(false);
+  const [previewUrl,  setPreviewUrl]    = useState("");
+  const [previewLoading, setPreviewLoading] = useState(false);
 
 
   //  CONSTRUCTION DE L'URL
@@ -68,11 +93,6 @@ export default function WidgetBuilder({ onClose }) {
   if (color2) params.set("color2", color2);
   if (color3) params.set("color3", color3);
 
-
-  //  POINT 4 — On ajoute les couleurs si elles sont actives.
-  //  Le # dans les couleurs hex doit être encodé en %23.
-  //  encodeURIComponent("#a8cbff") → "%23a8cbff"
-  //  URLSearchParams.set() fait cet encodage automatiquement.
   if (activerPrimary) params.set("primaryColor", primaryColor);
   if (activerBg)      params.set("bgColor",      bgColor);
   if (activerAccent)  params.set("accentColor",  accentColor);
@@ -84,7 +104,7 @@ export default function WidgetBuilder({ onClose }) {
   const generatedUrl = queryString ? `${baseUrl}/?${queryString}` : baseUrl;
   const iframeCode   = `<iframe\n  src="${generatedUrl}"\n  width="100%"\n  height="600px"\n  style="border:none;"\n  title="Emploi du temps"\n></iframe>`;
 
-  
+
   //  Helpers UI
   const toggleJour = (i) => {
     const j = [...joursCoches];
@@ -103,12 +123,34 @@ export default function WidgetBuilder({ onClose }) {
     });
   };
 
-  
+  //  POINT 7 — Handlers de l'apercu
+  //
+  //  lancerApercu : appelee au premier clic sur "Apercu en
+  //  direct". Active le panneau ET charge l'URL courante.
+  //
+  //  actualiserApercu : appelee au clic sur "Actualiser".
+  //  Copie l'URL courante dans previewUrl pour forcer le
+  //  rechargement de l'iframe via changement de key.
+  //
+  //  fermerApercu : masque le panneau sans le detruire,
+  //  ce qui permet de le rouvrir sans rechargement.
+  const lancerApercu = () => {
+    setPreviewUrl(generatedUrl);
+    setShowPreview(true);
+    setPreviewLoading(true);
+  };
+
+  const actualiserApercu = () => {
+    setPreviewUrl(generatedUrl);
+    setPreviewLoading(true);
+  };
+
+  const fermerApercu = () => {
+    setShowPreview(false);
+  };
+
+
   //  EXEMPLE D'INTEGRATION POSTMESSAGE
-  //  Ce code est destine a etre copie par le developpeur
-  //  qui integre le widget dans sa page parente.
-  //  Il illustre : reference a l'iframe, envoi d'une commande,
-  //  et ecoute de la confirmation.
   const postMessageExample = `<!-- 1. L'iframe dans votre page HTML -->
 <iframe
   id="mon-calendrier"
@@ -157,7 +199,7 @@ export default function WidgetBuilder({ onClose }) {
           Configurez et copiez le code iframe a integrer dans votre site.
         </p>
 
-        {/* ---- Calendrier ---- */}
+        {/* Calendrier */}
         <Section titre="Calendrier">
           <Champ label="ID du calendrier Google" aide="Laissez vide pour le calendrier par defaut">
             <input type="text" placeholder="ex: ecole@group.calendar.google.com"
@@ -216,12 +258,7 @@ export default function WidgetBuilder({ onClose }) {
           </Champ>
         </Section>
 
-        {/*
-            POINT 4 — Personnalisation des couleurs
-            Chaque ligne a une case a cocher qui active la surcharge.
-            Si la case est non cochee, le param n'est pas ajoute a l'URL
-            et le calendrier garde sa couleur par defaut du theme choisi.
-          */}
+        {/* Personnalisation des couleurs */}
         <Section titre="Personnalisation des couleurs">
           <p style={{ margin: "0 0 12px", color: "#888", fontSize: "12px" }}>
             Cochez une couleur pour la personnaliser. Sans coche, le theme par defaut s'applique.
@@ -275,7 +312,7 @@ export default function WidgetBuilder({ onClose }) {
           </div>
         </Section>
 
-        {/* CSS externe (Point 4 avance) */}
+        {/* CSS externe */}
         <Section titre="Feuille CSS externe (avance)">
           <Champ
             label="URL de votre fichier CSS"
@@ -289,7 +326,6 @@ export default function WidgetBuilder({ onClose }) {
               style={styles.input}
             />
           </Champ>
-          {/* Apercu du contenu CSS a ecrire pour les integrateurs */}
           {cssUrl.startsWith("https://") && (
             <div style={styles.codeHint}>
               <strong>Contenu suggere pour votre fichier CSS :</strong>
@@ -334,14 +370,68 @@ export default function WidgetBuilder({ onClose }) {
             <button id="btn-iframe" onClick={() => copier(iframeCode, "btn-iframe")} style={styles.copyBtn}>Copier</button>
           </div>
           <textarea readOnly value={iframeCode} style={styles.textarea} onClick={e => e.target.select()} />
+
+          {/* 
+              POINT 7 — BOUTON D'APERCU EN DIRECT
+              Positionne juste apres les champs de resultat.
+              L'utilisateur a configure son widget et veut voir
+              le rendu final avant de copier le code.
+            */}
+          <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
+            {!showPreview ? (
+              <button onClick={lancerApercu} style={styles.previewBtn}>
+                Apercu en direct
+              </button>
+            ) : (
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button onClick={actualiserApercu} style={styles.previewBtn}>
+                  Actualiser l'apercu
+                </button>
+                <button onClick={fermerApercu} style={styles.previewBtnSecondary}>
+                  Masquer l'apercu
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/*
-            INTEGRATION AVANCEE : postMessage API
-            Cette section explique au developpeur comment
-            controler le widget dynamiquement depuis la page
-            parente, sans recharger l'iframe.
-        */}
+            POINT 7 — PANNEAU D'APERCU EN DIRECT
+            Ce bloc n'est rendu que si showPreview === true.
+            key={previewUrl} force la recreation de l'iframe
+            a chaque clic sur Actualiser.
+         */}
+        {showPreview && (
+          <div style={styles.previewSection}>
+            <div style={styles.previewHeader}>
+              <span style={{ fontWeight: "bold", fontSize: "13px", color: "#333" }}>
+                Apercu en direct
+              </span>
+              {previewLoading && (
+                <span style={styles.previewSpinner}>Chargement...</span>
+              )}
+              <span style={{ fontSize: "11px", color: "#999", marginLeft: "auto", maxWidth: "300px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {previewUrl}
+              </span>
+            </div>
+
+            <div style={styles.previewNote}>
+              L'apercu reflète la configuration au moment du dernier clic sur "Apercu en direct"
+              ou "Actualiser l'apercu". Modifiez les parametres ci-dessus puis cliquez Actualiser
+              pour voir les changements.
+            </div>
+
+            <iframe
+              key={previewUrl}
+              src={previewUrl}
+              title="Apercu du widget"
+              style={styles.previewIframe}
+              onLoad={() => setPreviewLoading(false)}
+            />
+          </div>
+        )}
+
+        {/* Integration avancee : postMessage */}
         <Section titre="Integration avancee : controle dynamique (postMessage)">
           <p style={{ margin: "0 0 10px", color: "#555", fontSize: "12px", lineHeight: "1.6" }}>
             Une fois l'iframe integree dans votre page, vous pouvez lui envoyer des commandes
@@ -394,13 +484,11 @@ export default function WidgetBuilder({ onClose }) {
 
 
 //  Composant : une ligne de sélection de couleur
-//  case a cocher + label + input[type=color]
 function LigneCouleur({ label, active, onToggle, couleur, onChangeCouleur }) {
   return (
     <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontSize: "13px" }}>
       <input type="checkbox" checked={active} onChange={onToggle} />
       <span style={{ flex: 1 }}>{label}</span>
-      {/* input type="color" : selecteur de couleur natif du navigateur */}
       <input
         type="color"
         value={couleur}
@@ -412,7 +500,6 @@ function LigneCouleur({ label, active, onToggle, couleur, onChangeCouleur }) {
           opacity: active ? 1 : 0.4,
         }}
       />
-      {/* Affiche la valeur hex a cote */}
       <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#666", minWidth: "70px" }}>
         {active ? couleur : "defaut"}
       </span>
@@ -485,5 +572,37 @@ const styles = {
   codeHint: {
     marginTop: "10px", padding: "12px", backgroundColor: "#f0f4ff",
     borderRadius: "6px", border: "1px solid #c0d0ff", fontSize: "12px",
+  },
+
+  //  POINT 7 — Styles du panneau d'apercu
+  previewBtn: {
+    padding: "9px 20px", backgroundColor: "#111", color: "white",
+    border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px",
+    fontWeight: "bold",
+  },
+  previewBtnSecondary: {
+    padding: "9px 20px", backgroundColor: "transparent", color: "#555",
+    border: "1px solid #ccc", borderRadius: "8px", cursor: "pointer", fontSize: "13px",
+  },
+  previewSection: {
+    marginTop: "20px", borderRadius: "10px",
+    border: "1px solid #d0e0ff", overflow: "hidden",
+    backgroundColor: "#f4f8ff",
+  },
+  previewHeader: {
+    display: "flex", alignItems: "center", gap: "12px",
+    padding: "10px 16px", borderBottom: "1px solid #d0e0ff",
+    backgroundColor: "#e8f0ff",
+  },
+  previewSpinner: {
+    fontSize: "12px", color: "#5577bb", fontStyle: "italic",
+  },
+  previewNote: {
+    padding: "8px 16px", fontSize: "11px", color: "#778",
+    borderBottom: "1px solid #d0e0ff", lineHeight: "1.5",
+    backgroundColor: "#edf3ff",
+  },
+  previewIframe: {
+    width: "100%", height: "500px", border: "none", display: "block",
   },
 };

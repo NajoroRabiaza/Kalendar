@@ -13,29 +13,24 @@ import getUrlParams from "./getUrlParams";
 import DocsPage from "./DocsPage";
 
 export default function App() {
-  // --------------------------------------------------------
-  //  RÈGLE FONDAMENTALE DE REACT :
   //  Tous les hooks (useState, useEffect...) doivent être
   //  appelés INCONDITIONNELLEMENT, tout en haut du composant,
   //  avant tout return anticipé. C'est la "Rules of Hooks".
   //  Si on met un return avant un hook, React ne peut plus
   //  garantir que les hooks sont appelés dans le même ordre
   //  à chaque rendu = erreur de compilation.
-  // --------------------------------------------------------
 
   const [showBuilder, setShowBuilder] = useState(false);
 
   //  Lecture unique de tous les paramètres URL
   const urlParams = getUrlParams();
 
-  // ----------------------------------------------------------
   //  postMessage API
   //  Ces trois states permettent au site parent de changer
   //  dynamiquement le groupe affiche, le theme et la langue
   //  SANS recharger l'iframe. La valeur initiale vient de
   //  l'URL (?show=H1) ; elle peut ensuite etre ecrasee par
   //  un message postMessage de la page parente.
-  // ----------------------------------------------------------
   const [dynamicShow,  setDynamicShow]  = useState(urlParams.show);
   const [dynamicTheme, setDynamicTheme] = useState(urlParams.theme);
   const [dynamicLang,  setDynamicLang]  = useState(urlParams.lang);
@@ -78,7 +73,6 @@ export default function App() {
     };
   }, [urlParams.cssUrl]); // se re-déclenche uniquement si cssUrl change
 
-  // ----------------------------------------------------------
   //  postMessage : ECOUTE DES COMMANDES DU SITE PARENT
   //
   //  Principe :
@@ -103,7 +97,6 @@ export default function App() {
   //  l'action executee et la valeur finale appliquee.
   //  Cela permet au parent de savoir si sa commande a ete prise
   //  en compte, et quelle valeur est desormais active.
-  // ----------------------------------------------------------
   useEffect(() => {
     const THEMES_VALIDES = ["light", "dark"];
     const LANGUES_VALIDES = ["fr", "en", "mg"];
@@ -171,11 +164,9 @@ export default function App() {
     };
   }, []); // [] = ne s'execute qu'une seule fois, au montage
 
-  // --------------------------------------------------------
   //  Return anticipé APRÈS tous les hooks — c'est ici la
   //  bonne place. Tous les hooks ont déjà été appelés
   //  inconditionnellement au-dessus, donc React est content.
-  // --------------------------------------------------------
   if (isDocsPage) return <DocsPage />;
 
 
