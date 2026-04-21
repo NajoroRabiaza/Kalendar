@@ -1,35 +1,43 @@
-//  getUrlParams.js
-//  Lit et valide TOUS les paramètres URL de l'application.
+// getUrlParams.js
+// Lit et valide TOUS les paramètres URL de l'application.
 //
-//  PARAMÈTRES SUPPORTÉS :
+// PARAMÈTRES SUPPORTÉS :
 //
-//  Calendrier
-//  ?calId=xxx@group.cal...= ID du calendrier Google
-//  ?show=H1  = affiche uniquement ce groupe
-//  ?title=Mon+Emploi = titre de l'en-tête (max 100 car.)
-//  ?color1=Licence1 ... ?color11=  = renomme les groupes par couleur
+// Calendrier
+// ?calId=xxx@group.cal...  = ID du calendrier Google
+// ?show=H1      = affiche uniquement ce groupe
+// ?title=Mon+Emploi  = titre de l'en-tête (max 100 car.)
+// ?color1=Licence1...color11 = renomme les groupes par couleur
 //
-//  Affichage 
-//  ?theme=light|dark   = thème visuel (défaut: light)
-//  ?lang=fr|en|mg  = langue (défaut: fr)
-//  ?from=07:00&to=18:00 = plage horaire
-//  ?hiddenDays=0,6  = jours masqués (0=dim, 6=sam)
-//  ?hideBuilder=true  = cache le bouton Widget Builder
+// Affichage
+// ?theme=light|dark     = thème visuel (défaut: light)
+// ?lang=fr|en|mg     = langue (défaut: fr)
+// ?from=07:00&to=18:00  = plage horaire
+// ?hiddenDays=0,6    = jours masqués (0=dim, 6=sam)
+// ?hideBuilder=true     = cache le bouton Widget Builder
 //
-//   Personnalisation des couleurs (POINT 4) 
-//  ?primaryColor=%23a8cbff= couleur principale (bandeau des jours)
-//  ?bgColor=%23ffffff  = couleur de fond général
-//  ?accentColor=%23eef4ff = couleur secondaire (colonne heures)
-//  ?textColor=%23004085  = couleur du texte dans le bandeau
-//  ?fontFamily=Roboto  = police d'écriture
-//  ?cssUrl=https://...  = URL d'une feuille CSS externe (https uniquement)
+// Personnalisation des couleurs
+// ?primaryColor=%23a8cbff = couleur principale (bandeau des jours)
+// ?bgColor=%23ffffff      = couleur de fond général
+// ?accentColor=%23eef4ff  = couleur secondaire (colonne heures)
+// ?textColor=%23004085  = couleur du texte dans le bandeau
+// ?fontFamily=Roboto    = police d'écriture
+// ?cssUrl=https://...   = URL d'une feuille CSS externe (https uniquement)
 //
-//  NOTE sur les couleurs dans l'URL :
-//  Le # est un caractère spécial en URL (il désigne les ancres).
-//  Il faut l'encoder en %23 pour qu'il soit transmis correctement.
-//  Ex: ?primaryColor=%23ff0000  =  primaryColor = "#ff0000"
-//  URLSearchParams le décode automatiquement, donc côté JS on
-//  récupère bien "#ff0000".
+// Configuration externe
+// ?config=https://...  = URL d'un fichier JSON de configuration complet.
+//     Permet à une nouvelle école de réutiliser l'app
+//     Vercel déployée sans toucher au code.
+//     Doit commencer par https://.
+//     Le serveur doit envoyer Access-Control-Allow-Origin: *
+//     Voir config.example.json à la racine du projet.
+//
+// NOTE sur les couleurs dans l'URL :
+// Le # est un caractère spécial en URL (il désigne les ancres).
+// Il faut l'encoder en %23 pour qu'il soit transmis correctement.
+// Ex: ?primaryColor=%23ff0000  =  primaryColor = "#ff0000"
+// URLSearchParams le décode automatiquement, donc côté JS on
+// récupère bien "#ff0000".
 
 function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
@@ -41,7 +49,7 @@ function getUrlParams() {
   };
 
 
-  //  SECTION 1 : PARAMÈTRES EXISTANTS (inchangés)
+  // SECTION 1 : PARAMÈTRES D'AFFICHAGE
   // Thème
   const THEMES_VALIDES = ["light", "dark"];
   const rawTheme = get("theme", "light");
@@ -91,62 +99,59 @@ function getUrlParams() {
   }
 
 
-  //  SECTION 2 : PERSONNALISATION DES COULEURS (POINT 4)
+  // SECTION 2 : PERSONNALISATION DES COULEURS
+
   // Regex de validation d'une couleur hexadécimale.
   // Accepte : #abc (3 chiffres) ou #aabbcc (6 chiffres)
-  // URLSearchParams décode %23 = # automatiquement.
+  // URLSearchParams décode %23 → # automatiquement.
   const HEX_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
   const validerCouleur = (key) => {
     const val = get(key, null);
     if (!val) return null;
-    // Sécurité : on accepte uniquement une vraie couleur hex
-    // On refuse toute autre valeur (ex: "red", "rgb()", "expression(...)")
     return HEX_REGEX.test(val) ? val : null;
   };
 
-  const primaryColor = validerCouleur("primaryColor"); // bandeau des jours
-  const bgColor      = validerCouleur("bgColor");      // fond général
-  const accentColor  = validerCouleur("accentColor");  // colonne heures
-  const textColor    = validerCouleur("textColor");    // texte bandeau
+  const primaryColor = validerCouleur("primaryColor");
+  const bgColor      = validerCouleur("bgColor");
+  const accentColor  = validerCouleur("accentColor");
+  const textColor    = validerCouleur("textColor");
 
-
-  // Police d'écriture
-  // On accepte uniquement des lettres, chiffres, espaces,
-  // virgules, apostrophes et tirets — ce qui couvre toutes
-  // les polices CSS valides (ex: "Roboto", "Open Sans", etc.)
-  // On refuse tout caractère dangereux (;, {, }, etc.)
+  // Police d'écriture : lettres, chiffres, espaces, virgules, apostrophes, tirets uniquement
   const FONT_REGEX = /^[a-zA-Z0-9\s,'-]+$/;
-  const rawFont  = get("fontFamily", null);
+  const rawFont    = get("fontFamily", null);
   const fontFamily = rawFont && FONT_REGEX.test(rawFont) ? rawFont : null;
 
-
-  // URL d'une feuille CSS externe (?cssUrl=https://...)
-  // Règle de sécurité : on n'accepte QUE les URLs https://
-  // Cela empêche l'injection de javascript: ou http:// non sécurisé
+  // URL CSS externe
   const rawCssUrl = get("cssUrl", null);
   const cssUrl    = rawCssUrl && rawCssUrl.startsWith("https://") ? rawCssUrl : null;
 
 
-  //  RÉSULTAT FINAL
+  // SECTION 3 : CONFIGURATION EXTERNE (?config=https://...)
+  //
+  // Même règle de sécurité que cssUrl : https:// uniquement.
+  //
+  // La valeur est lue ici mais le fetch() est fait dans App.js
+  // via un useEffect, car getUrlParams est une fonction pure :
+  // elle ne fait que lire et valider, jamais d'appel réseau.
+  // Cela rend la fonction testable et prévisible.
+  const rawConfigUrl = get("config", null);
+  const configUrl    = rawConfigUrl && rawConfigUrl.startsWith("https://") ? rawConfigUrl : null;
+
+
+  // RÉSULTAT FINAL
   return {
-    // Existants
     theme, lang, fcLocale,
     from, to, hiddenDays,
     hideBuilder, title, calId, show,
     colorOverrides,
-
-    // Nouveaux (point 4)
-    primaryColor,
-    bgColor,
-    accentColor,
-    textColor,
-    fontFamily,
+    primaryColor, bgColor, accentColor, textColor, fontFamily,
     cssUrl,
+    configUrl,
   };
 }
 
-//  Utilitaire : convertit "07:30" en minutes (450
+// Utilitaire : convertit "07:30" en minutes (450)
 function timeToMinutes(hhmm) {
   const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + m;

@@ -13,105 +13,138 @@ import getUrlParams from "./getUrlParams";
 import DocsPage from "./DocsPage";
 
 export default function App() {
-  //  Tous les hooks (useState, useEffect...) doivent être
-  //  appelés INCONDITIONNELLEMENT, tout en haut du composant,
-  //  avant tout return anticipé. C'est la "Rules of Hooks".
-  //  Si on met un return avant un hook, React ne peut plus
-  //  garantir que les hooks sont appelés dans le même ordre
-  //  à chaque rendu = erreur de compilation.
+  // RÈGLE FONDAMENTALE DE REACT :
+  // Tous les hooks doivent être appelés INCONDITIONNELLEMENT,
+  // tout en haut du composant, avant tout return anticipé.
+  // C'est la "Rules of Hooks".
 
   const [showBuilder, setShowBuilder] = useState(false);
 
-  //  Lecture unique de tous les paramètres URL
+  // Lecture unique de tous les paramètres URL
   const urlParams = getUrlParams();
 
-  //  postMessage API
-  //  Ces trois states permettent au site parent de changer
-  //  dynamiquement le groupe affiche, le theme et la langue
-  //  SANS recharger l'iframe. La valeur initiale vient de
-  //  l'URL (?show=H1) ; elle peut ensuite etre ecrasee par
-  //  un message postMessage de la page parente.
+  // postMessage API :
+  // Ces trois states permettent au site parent de changer
+  // dynamiquement le groupe affiché, le thème et la langue
+  // SANS recharger l'iframe. La valeur initiale vient de
+  // l'URL (?show=H1) ; elle peut ensuite être écrasée par
+  // un message postMessage de la page parente.
   const [dynamicShow,  setDynamicShow]  = useState(urlParams.show);
   const [dynamicTheme, setDynamicTheme] = useState(urlParams.theme);
   const [dynamicLang,  setDynamicLang]  = useState(urlParams.lang);
 
   // Routing minimal : ?docs=1 = page de documentation
-  // On lit le param AVANT les hooks mais on effectue le return APRÈS.
   const isDocsPage = new URLSearchParams(window.location.search).get("docs") === "1";
 
-  //  POINT 4 — INJECTION DE LA FEUILLE CSS EXTERNE
-  //  Si ?cssUrl=https://... est fourni dans l'URL, on crée
-  //  dynamiquement un élément <link> dans le <head> de la page.
-  //  useEffect s'exécute UNE SEULE FOIS après le premier rendu.
+  // CONFIGURATION EXTERNE (?config=https://...)
   //
-  //  Pourquoi useEffect et pas directement dans le JSX ?
-  //  Parce que <link> doit être dans le <head>, pas dans le
-  //  <body>. useEffect nous donne accès au DOM réel après rendu.
+  // Principe : une école peut héberger un fichier JSON sur
+  // son propre serveur et passer son URL via ?config=.
+  // L'app Vercel déployée récupère ce JSON au démarrage
+  // et l'utilise à la place de calendarConfig.js.
+  // Cela permet une réutilisation SANS modifier le code
+  // et SANS redéployer : un seul déploiement Vercel sert
+  // toutes les écoles qui hébergent leur propre config.json.
   //
-  //  On nettoie aussi le lien si le composant est démonté
-  //  (la fonction retournée par useEffect = nettoyage).
-  useEffect(() => {
-    if (!urlParams.cssUrl) return; // rien à faire si pas de cssUrl
+  // externalConfig démarre à null (= pas encore chargé).
+  // Une fois le fetch terminé, il contient l'objet JSON
+  // ou reste null si le fetch a échoué.
+  //
+  // configLoading = true tant que le fetch est en cours.
+  // configError   = message d'erreur si le fetch a échoué.
+  const [externalConfig, setExternalConfig] = useState(null);
+  const [configLoading,  setConfigLoading]  = useState(!!urlParams.configUrl);
+  const [configError,    setConfigError]    = useState(null);
 
-    // On vérifie qu'on n'a pas déjà injecté ce lien
-    // (pour éviter les doublons en cas de re-rendu)
+  // useEffect : INJECTION DE LA FEUILLE CSS EXTERNE
+  // Si ?cssUrl=https://... est fourni dans l'URL, on crée
+  // dynamiquement un élément <link> dans le <head>.
+  // useEffect s'exécute UNE SEULE FOIS après le premier rendu.
+  useEffect(() => {
+    if (!urlParams.cssUrl) return;
+
     const existingLink = document.getElementById("cal-external-css");
     if (existingLink) return;
 
     const link = document.createElement("link");
-    link.id   = "cal-external-css"; // identifiant unique pour éviter les doublons
+    link.id   = "cal-external-css";
     link.rel  = "stylesheet";
     link.type = "text/css";
     link.href = urlParams.cssUrl;
-
     document.head.appendChild(link);
 
-    // Nettoyage : si le composant est démonté, on retire le lien
     return () => {
       const l = document.getElementById("cal-external-css");
       if (l) l.remove();
     };
-  }, [urlParams.cssUrl]); // se re-déclenche uniquement si cssUrl change
+  }, [urlParams.cssUrl]);
 
-  //  postMessage : ECOUTE DES COMMANDES DU SITE PARENT
+  // useEffect : FETCH DU FICHIER JSON DE CONFIGURATION
   //
-  //  Principe :
-  //  La page parente (qui integre l'iframe) peut appeler
-  //  iframeElement.contentWindow.postMessage(payload, "*")
-  //  Le widget ecoute via window.addEventListener("message").
+  // Ce useEffect se déclenche UNE SEULE FOIS au montage
+  // (si configUrl est présent dans l'URL).
   //
-  //  Format attendu du message :
-  //  { type: "KALENDAR_CMD", action: "SET_GROUP", value: "H2" }
-  //  { type: "KALENDAR_CMD", action: "SET_THEME", value: "dark" }
-  //  { type: "KALENDAR_CMD", action: "SET_LANG",  value: "en"   }
+  // Le JSON attendu suit la structure de calendarConfig.js.
+  // Les clés absentes sont ignorées : l'app garde la valeur
+  // de calendarConfig comme fallback pour chaque champ.
+  // Voir config.example.json à la racine du projet.
   //
-  //  Securite :
-  //  On n'accepte que les messages dont le type vaut exactement
-  //  "KALENDAR_CMD". Cela evite de reagir aux messages d'autres
-  //  scripts (ex : extensions navigateur, bibliotheques tierces).
-  //  On valide aussi chaque valeur avant de l'appliquer.
+  // Pourquoi fetch() et pas import() ?
+  // Parce que l'URL est inconnue au moment de la compilation.
+  // Elle n'est connue qu'à l'exécution via l'URL.
+  // fetch() est la bonne primitive pour ça.
   //
-  //  Confirmation :
-  //  Apres chaque commande reussie, on repond a la page parente
-  //  via window.parent.postMessage(...) avec un ACK contenant
-  //  l'action executee et la valeur finale appliquee.
-  //  Cela permet au parent de savoir si sa commande a ete prise
-  //  en compte, et quelle valeur est desormais active.
+  // Gestion des erreurs :
+  // fetch() ne rejette PAS les erreurs HTTP (404, 403...).
+  // On vérifie response.ok manuellement.
+  // Si le fetch échoue, on affiche un message clair.
+  // L'app ne plante pas : elle continue avec calendarConfig.
   useEffect(() => {
-    const THEMES_VALIDES = ["light", "dark"];
+    if (!urlParams.configUrl) return;
+
+    setConfigLoading(true);
+    setConfigError(null);
+
+    fetch(urlParams.configUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erreur HTTP " + response.status);
+        }
+        return response.json();
+      })
+      .then((json) => {
+        if (typeof json !== "object" || json === null) {
+          throw new Error("Le fichier JSON est invalide.");
+        }
+        setExternalConfig(json);
+        setConfigLoading(false);
+      })
+      .catch((err) => {
+        setConfigError(err.message || "Erreur inconnue");
+        setConfigLoading(false);
+      });
+  }, [urlParams.configUrl]);
+
+  // useEffect : ECOUTE DES COMMANDES POSTMESSAGE
+  //
+  // La page parente peut appeler :
+  // iframeEl.contentWindow.postMessage(payload, "*")
+  // Format attendu :
+  // { type: "KALENDAR_CMD", action: "SET_GROUP", value: "H2" }
+  // { type: "KALENDAR_CMD", action: "SET_THEME", value: "dark" }
+  // { type: "KALENDAR_CMD", action: "SET_LANG",  value: "en"  }
+  useEffect(() => {
+    const THEMES_VALIDES  = ["light", "dark"];
     const LANGUES_VALIDES = ["fr", "en", "mg"];
 
     const handleMessage = (event) => {
-      // On ignore tout message qui n'a pas notre type propriétaire
       if (!event.data || event.data.type !== "KALENDAR_CMD") return;
 
       const { action, value } = event.data;
-
-      let applied = false;
+      let applied    = false;
       let finalValue = value;
 
       if (action === "SET_GROUP") {
-        // value peut etre une chaine (ex: "H2") ou null/"" pour tout afficher
         const groupe = typeof value === "string" ? value.trim().slice(0, 30) : "";
         setDynamicShow(groupe || null);
         finalValue = groupe || null;
@@ -128,73 +161,94 @@ export default function App() {
         }
       }
 
-      // Envoi de la confirmation (ACK) vers la page parente
-      // window.parent === window si on n'est pas dans une iframe,
-      // ce qui est inoffensif (on s'envoie le message a soi-meme).
-      if (applied) {
-        window.parent.postMessage(
-          {
-            type: "KALENDAR_ACK",
-            action,
-            value: finalValue,
-            ok: true,
-          },
-          "*"
-        );
-      } else {
-        // Commande inconnue ou valeur invalide : on signale l'echec
-        window.parent.postMessage(
-          {
-            type: "KALENDAR_ACK",
-            action,
-            value,
-            ok: false,
-            reason: "Action inconnue ou valeur invalide",
-          },
-          "*"
-        );
-      }
+      window.parent.postMessage(
+        applied
+          ? { type: "KALENDAR_ACK", action, value: finalValue, ok: true }
+          : { type: "KALENDAR_ACK", action, value, ok: false, reason: "Action ou valeur invalide" },
+        "*"
+      );
     };
 
     window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
-    // Nettoyage : on retire le listener quand le composant est démonté
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  }, []); // [] = ne s'execute qu'une seule fois, au montage
-
-  //  Return anticipé APRÈS tous les hooks — c'est ici la
-  //  bonne place. Tous les hooks ont déjà été appelés
-  //  inconditionnellement au-dessus, donc React est content.
+  // Return anticipé APRÈS tous les hooks.
   if (isDocsPage) return <DocsPage />;
 
+  // AFFICHAGE PENDANT LE CHARGEMENT DU JSON
+  //
+  // Si ?config= est dans l'URL, on attend le fetch avant
+  // d'afficher le calendrier. Sinon on afficherait le
+  // calendrier avec calendarConfig puis il se rechargerait
+  // avec la config externe, ce qui est visuellement perturbant.
+  if (configLoading) {
+    return (
+      <div style={stylesChargement.container}>
+        <p style={stylesChargement.texte}>Chargement de la configuration...</p>
+        <p style={stylesChargement.url}>{urlParams.configUrl}</p>
+      </div>
+    );
+  }
 
-  //  POINT 4 — CONSTRUCTION DES STYLES INLINE (CSS VARIABLES)
-  //  Voici le mécanisme clé :
-  //  En CSS, une variable définie en inline style="--cal-primary: red"
-  //  sur un élément a une priorité PLUS HAUTE que toute règle
-  //  CSS dans une feuille de style, même avec !important sur
-  //  une variable (les custom properties ne supportent pas !important de la même façon).
+  // AFFICHAGE EN CAS D'ERREUR DE CHARGEMENT
   //
-  //  Donc si l'URL contient ?primaryColor=%23ff0000, on injecte
-  //  "--cal-primary: #ff0000" directement sur le div principal.
-  //  Le CSS lit ensuite --cal-primary via var(--cal-primary),
-  //  et tout le calendrier se met à jour automatiquement.
+  // On affiche un message clair avec la cause de l'erreur.
+  // Les deux causes les plus courantes sont :
+  //  1. Le fichier n'existe pas (404)
+  //  2. Le serveur n'a pas CORS activé (Access-Control-Allow-Origin)
+  if (configError) {
+    return (
+      <div style={stylesChargement.container}>
+        <p style={stylesChargement.erreurTitre}>Impossible de charger la configuration externe.</p>
+        <p style={stylesChargement.erreurDetail}>{configError}</p>
+        <p style={stylesChargement.erreurConseil}>
+          Verifiez que le fichier est accessible en https:// et que le serveur envoie
+          l'en-tete <code>Access-Control-Allow-Origin: *</code>.
+        </p>
+      </div>
+    );
+  }
+
+  // FUSION DES CONFIGS : externe (JSON) + locale (calendarConfig)
   //
-  //  On ne construit l'objet style que pour les valeurs présentes.
-  //  Si une valeur est null (param absent ou invalide),
-  //  on ne met rien = le CSS garde sa valeur par défaut.
+  // On construit un objet "config" final en deux couches :
+  // 1. calendarConfig  : base locale, toujours présente
+  // 2. externalConfig  : JSON externe, écrase la base si présent
+  //
+  // On utilise l'opérateur ?? (nullish coalescing) :
+  // "prend la valeur de gauche si elle est non-null/undefined,
+  //  sinon prend la valeur de droite"
+  //
+  // Les paramètres URL individuels (calId, title...) écrasent
+  // tout dans la logique métier en dessous.
+  const config = {
+    apiKey:           externalConfig?.apiKey           ?? calendarConfig.apiKey,
+    masterCalendarId: externalConfig?.masterCalendarId ?? calendarConfig.masterCalendarId,
+    header: {
+      prefix:   externalConfig?.header?.prefix   ?? calendarConfig.header.prefix,
+      title:    externalConfig?.header?.title     ?? calendarConfig.header.title,
+      dateText: externalConfig?.header?.dateText  ?? calendarConfig.header.dateText,
+    },
+    colorMapping: externalConfig?.colorMapping ?? calendarConfig.colorMapping,
+  };
+
+  // CONSTRUCTION DES STYLES INLINE (CSS VARIABLES)
+  //
+  // En CSS, une variable définie en inline style="--cal-primary: red"
+  // a une priorité plus haute que toute règle dans une feuille de style.
+  // Donc si l'URL contient ?primaryColor=%23ff0000, on injecte
+  // "--cal-primary: #ff0000" directement sur le div principal.
+  // Le CSS lit via var(--cal-primary), et tout se met à jour.
   const inlineVars = {};
-
   if (urlParams.primaryColor) inlineVars["--cal-primary"] = urlParams.primaryColor;
   if (urlParams.bgColor)      inlineVars["--cal-bg"]      = urlParams.bgColor;
   if (urlParams.accentColor)  inlineVars["--cal-accent"]  = urlParams.accentColor;
   if (urlParams.textColor)    inlineVars["--cal-text"]    = urlParams.textColor;
   if (urlParams.fontFamily)   inlineVars["--cal-font"]    = urlParams.fontFamily;
 
-  //  Mapping des couleurs (config + surcharges URL)
-  const activeMapping = { ...calendarConfig.colorMapping };
+  // Mapping des couleurs (config fusionnée + surcharges URL)
+  const activeMapping = { ...config.colorMapping };
   for (const [colorId, newLabel] of Object.entries(urlParams.colorOverrides)) {
     if (activeMapping[colorId]) {
       activeMapping[colorId] = { ...activeMapping[colorId], label: newLabel };
@@ -203,17 +257,14 @@ export default function App() {
     }
   }
 
-  //  Titre
-  const headerTitle = urlParams.title || calendarConfig.header.title;
+  // Titre : ?title= dans l'URL > config externe > calendarConfig
+  const headerTitle = urlParams.title || config.header.title;
 
-  //  Transformation des événements
+  // Transformation des événements
   const handleEventDataTransform = (eventData) => {
     const rawColorId = eventData.colorId || "default";
     const groupInfo  = activeMapping[rawColorId] || activeMapping["default"];
 
-    // On utilise dynamicShow (etat React) plutot que urlParams.show
-    // pour que les changements via postMessage soient pris en compte
-    // sans recharger la page.
     if (dynamicShow && groupInfo.label !== dynamicShow) return false;
 
     eventData.backgroundColor = groupInfo.hex;
@@ -223,7 +274,7 @@ export default function App() {
     return eventData;
   };
 
-  //  Rendu des blocs d'événements
+  // Rendu des blocs d'événements
   const renderEventContent = (eventInfo) => {
     const { start, end } = eventInfo.event;
     const groupLabel = eventInfo.event.extendedProps?.groupLabel || "G";
@@ -238,23 +289,17 @@ export default function App() {
     );
   };
 
-  //  En-tête des colonnes jours
+  // En-tête des colonnes jours
   const renderDayHeader = (args) => {
     const jours = {
       fr: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
       en: ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
       mg: ["Alah.", "Alats.", "Tal.", "Alar.", "Alak.", "Zom.", "Sab."],
     };
-    // dynamicLang peut avoir ete change par postMessage SET_LANG
     const noms = jours[dynamicLang] || jours["fr"];
     return `${noms[args.date.getDay()]} ${args.date.getDate()}/${args.date.getMonth() + 1}`;
   };
 
-  //  RENDU PRINCIPAL
-  //  Le point clé est ici : on passe `inlineVars` comme
-  //  prop `style` sur le div principal. React fusionne
-  //  correctement les CSS custom properties dans le style
-  //  inline du DOM, ce qui écrase les valeurs du CSS.
   return (
     <div
       className="app-container"
@@ -267,18 +312,18 @@ export default function App() {
 
       <div className="custom-calendar-header">
         <div className="header-left">
-          <span className="header-prefix">{calendarConfig.header.prefix}</span>,{" "}
+          <span className="header-prefix">{config.header.prefix}</span>,{" "}
           <span className="header-title">{headerTitle}</span>
         </div>
-        <div className="header-right">{calendarConfig.header.dateText}</div>
+        <div className="header-right">{config.header.dateText}</div>
       </div>
 
       <div className="calendar-wrapper">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, googleCalendarPlugin]}
           initialView="timeGridWeek"
-          googleCalendarApiKey={calendarConfig.apiKey}
-          events={{ googleCalendarId: urlParams.calId || calendarConfig.masterCalendarId }}
+          googleCalendarApiKey={config.apiKey}
+          events={{ googleCalendarId: urlParams.calId || config.masterCalendarId }}
           eventDataTransform={handleEventDataTransform}
           locales={[frLocale, enLocale]}
           locale={dynamicLang === "mg" ? "fr" : dynamicLang}
@@ -314,3 +359,43 @@ export default function App() {
     </div>
   );
 }
+
+// Styles pour les écrans de chargement et d'erreur.
+// On les met ici plutôt que dans App.css car ils sont
+// uniquement utilisés dans des cas temporaires/exceptionnels.
+const stylesChargement = {
+  container: {
+    padding: "40px 20px",
+    fontFamily: "Arial, sans-serif",
+    textAlign: "center",
+    color: "#333",
+  },
+  texte: {
+    fontSize: "14px",
+    color: "#555",
+  },
+  url: {
+    fontSize: "11px",
+    color: "#999",
+    marginTop: "8px",
+    wordBreak: "break-all",
+  },
+  erreurTitre: {
+    color: "#cc0000",
+    fontWeight: "bold",
+    fontSize: "15px",
+    marginBottom: "10px",
+  },
+  erreurDetail: {
+    fontSize: "13px",
+    color: "#666",
+    marginBottom: "8px",
+  },
+  erreurConseil: {
+    fontSize: "12px",
+    color: "#999",
+    maxWidth: "480px",
+    margin: "0 auto",
+    lineHeight: "1.6",
+  },
+};

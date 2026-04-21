@@ -1,0 +1,28 @@
+{
+  "_comment": "Fichier de configuration externe pour Kalendar. Hébergez ce fichier en https:// sur votre serveur et passez son URL via ?config=https://votre-serveur.com/config.json. Le serveur doit envoyer l'en-tête : Access-Control-Allow-Origin: *",
+
+  "apiKey": "VOTRE_CLE_API_GOOGLE_CALENDAR",
+
+  "masterCalendarId": "votre-calendrier@group.calendar.google.com",
+
+  "header": {
+    "prefix": "VOTRE ECOLE",
+    "title": "Emploi du Temps",
+    "dateText": "Semaine en cours"
+  },
+
+  "colorMapping": {
+    "1":  { "label": "Groupe A",  "hex": "#0099ff" },
+    "2":  { "label": "Groupe B",  "hex": "#ff6600" },
+    "3":  { "label": "Groupe C",  "hex": "#009900" },
+    "4":  { "label": "Groupe D",  "hex": "#9900cc" },
+    "5":  { "label": "Groupe E",  "hex": "#cc0000" },
+    "6":  { "label": "Groupe F",  "hex": "#cc6600" },
+    "7":  { "label": "Groupe G",  "hex": "#006666" },
+    "8":  { "label": "Groupe H",  "hex": "#333399" },
+    "9":  { "label": "Groupe I",  "hex": "#660033" },
+    "10": { "label": "Groupe J",  "hex": "#336600" },
+    "11": { "label": "Groupe K",  "hex": "#663300" },
+    "default": { "label": "General", "hex": "#333333" }
+  }
+}
