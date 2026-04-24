@@ -187,7 +187,7 @@ export default function WidgetBuilder({ onClose }) {
       console.log("Commande executee :", event.data.action, "->", event.data.value);
     }
   });
-<\/script>`;
+</script>`;
 
   //  RENDU
   return (
