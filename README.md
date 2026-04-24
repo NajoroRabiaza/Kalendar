@@ -1,131 +1,478 @@
-# Portail d'Emploi du Temps Universitaire
+# Kalendar — Portail d'Emploi du Temps Universitaire
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/NajoroRabiaza/Kalendar)
 
-Une application web interactive développée en React, conçue pour centraliser et afficher les emplois du temps des étudiants en temps réel. Le système utilise l'API Google Calendar comme "Source de Vérité Unique", offrant une interface claire et sans ambiguïté pour les étudiants, tout en simplifiant drastiquement le travail administratif.
+Une application web React qui affiche les emplois du temps universitaires en temps réel, directement synchronisée avec Google Calendar. Conçue pour être réutilisable : n'importe quelle institution peut intégrer Kalendar dans son site existant via une iframe, une API REST, ou un fichier de configuration externe, sans toucher au code source.
 
-## Objectifs du Projet
+---
 
-  - **Pour les Étudiants :** Offrir une visualisation instantanée, claire et colorée de leur journée. Fini les PDF obsolètes ou les erreurs d'emploi du temps ; les changements de salles ou d'horaires sont répercutés en temps réel.
-  - **Pour l'Administration :** Éliminer la double saisie. L'équipe pédagogique continue d'utiliser Google Agenda (idéal pour gérer les récurrences et les conflits), et la plateforme web se charge de synchroniser et de formater ces données automatiquement.
+## Sommaire
 
-## Fonctionnalités Principales
+- [Objectifs](#objectifs)
+- [Technologies](#technologies)
+- [Installation locale](#installation-locale)
+- [Configuration](#configuration)
+- [Paramètres URL](#paramètres-url)
+- [Personnalisation des couleurs](#personnalisation-des-couleurs)
+- [Intégration iframe](#intégration-iframe)
+- [API postMessage](#api-postmessage)
+- [API REST](#api-rest)
+- [Configuration externe JSON](#configuration-externe-json)
+- [Progressive Web App](#progressive-web-app)
+- [Widget Builder](#widget-builder)
+- [Page de documentation](#page-de-documentation)
+- [Architecture du projet](#architecture-du-projet)
+- [Licence](#licence)
 
-  - **Synchronisation Google Calendar :** Connexion directe et en temps réel à de multiples calendriers Google (par classes/groupes).
-  - **Interface Visuelle Sur-Mesure :** Design industriel type "blocs pleins" pour une lecture immédiate des cours et des intervalles.
-  - **Grille de Précision :** Affichage optimisé de 07h00 à 18h00 avec une granularité par quarts d'heure (lignes pleines pour les heures, pointillés pour les interlignes).
-  - **Filtrage Intelligent par URL :** Possibilité d'isoler l'emploi du temps d'un groupe spécifique via un paramètre dynamique dans l'URL.
-  - **Intégration Transparente :** Conçu pour être intégré facilement comme widget iframe sur n'importe quel site web institutionnel.
+---
 
-## Intégration Facile (Widget Iframe)
+## Objectifs
 
-L'un des grands atouts de ce projet est sa capacité à être intégré sur n'importe quel site web (WordPress, Moodle, site vitrine, etc.) sans aucune compétence en code, via une simple balise iframe.
+**Pour les étudiants :** Une visualisation instantanée, claire et colorée de l'emploi du temps. Les changements de salle ou d'horaire sont répercutés en temps réel sans aucune intervention manuelle.
 
-### 1. Afficher l'emploi du temps complet
-Copiez-collez ce code HTML dans votre page web :
+**Pour l'administration :** Zéro double saisie. L'équipe pédagogique continue d'utiliser Google Agenda normalement. Kalendar synchronise et formate tout automatiquement.
 
-```html
-<iframe 
-  src="https://VOTRE_PROJET.vercel.app" 
-  width="100%" 
-  height="700px" 
-  style="border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" 
-  title="Emploi du temps">
-</iframe>
-```
+**Pour les intégrateurs :** Un seul déploiement Vercel peut servir plusieurs institutions. Chaque école personnalise son widget via des paramètres URL ou un fichier JSON externe, sans modifier le code.
 
-### 2. Filtrer par groupe spécifique
-Pour n'afficher que l'emploi du temps d'un groupe spécifique (par exemple le groupe "H4" dont l'ID est `groupeB`), ajoutez simplement `?group=groupeB` à la fin de l'URL :
+---
 
-```html
-<iframe 
-  src="https://VOTRE_PROJET.vercel.app/?group=groupeB" 
-  width="100%" 
-  height="700px" 
-  style="border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" 
-  title="Emploi du temps - H4">
-</iframe>
-```
+## Technologies
 
-## Technologies Utilisées
+| Outil | Rôle |
+|---|---|
+| React 19 | Framework UI |
+| FullCalendar 6 | Moteur d'affichage du calendrier |
+| Google Calendar API | Source de données des événements |
+| Vercel | Hébergement + Serverless Functions |
+| Service Worker | Cache hors-ligne (PWA) |
 
-  - **Framework :** [React.js](https://reactjs.org/)
-  - **Moteur de Calendrier :** [FullCalendar](https://fullcalendar.io/) (Modules `daygrid`, `timegrid`, `google-calendar`)
-  - **Source de données :** API Google Calendar
+---
 
-## Configuration Rapide (calendarConfig.js)
-
-Toutes les variables du projet sont centralisées pour faciliter la maintenance. Pour ajouter, modifier ou supprimer un groupe d'étudiants, ou pour changer le titre de l'école, éditez simplement le fichier `src/calendarConfig.js` :
-
-```javascript
-export const calendarConfig = {
-  apiKey: "VOTRE_CLE_API_GOOGLE_ICI",
-  header: {
-    prefix: "THE",
-    title: "Holidays in Madagascar",
-    dateText: "dim. 21 mai - sam. 27 mai 2023"
-  },
-  groups: [
-    { 
-      id: "groupeA", 
-      title: "H1", 
-      calendarId: "ID_DU_CALENDRIER_GOOGLE@group.calendar.google.com", 
-      color: "#0099ff" 
-    },
-    // Ajoutez d'autres groupes ici...
-  ]
-};
-```
-
-Assurez-vous que les calendriers Google cibles sont configurés en **"Public"** dans leurs paramètres de partage pour que l'API puisse récupérer les événements.
-
-## Installation et Démarrage local
+## Installation locale
 
 ### Prérequis
 
-  - [Node.js](https://nodejs.org/) (version 14 ou supérieure)
-  - Un gestionnaire de paquets (npm ou yarn)
+- Node.js 14 ou supérieur
+- Un compte Google avec une clé API Google Calendar activée
 
-### Étapes d'installation
+### Étapes
 
-1.  **Cloner le dépôt :**
+```bash
+# 1. Cloner le dépôt
+git clone https://github.com/NajoroRabiaza/Kalendar.git
+cd Kalendar
 
-    ```bash
-    git clone [https://github.com/votre-nom/votre-projet-emploi-du-temps.git](https://github.com/votre-nom/votre-projet-emploi-du-temps.git)
-    cd votre-projet-emploi-du-temps
-    ```
+# 2. Installer les dépendances
+npm install
 
-2.  **Installer les dépendances :**
+# 3. Créer le fichier de variables d'environnement local
+#    Ce fichier est dans .gitignore, il ne sera jamais commité
+echo "GOOGLE_API_KEY=votre_cle_api" > .env.local
+echo "GOOGLE_CALENDAR_ID=votre_calendar_id" >> .env.local
 
-    ```bash
-    npm install
-    # ou
-    yarn install
-    ```
+# 4. Lancer le serveur de développement
+npm start
+```
 
-3.  **Configurer les données :**
-    Ouvrez le fichier `src/calendarConfig.js` et assurez-vous d'insérer votre clé API Google valide et vos identifiants de calendriers.
+L'application sera accessible sur `http://localhost:3000`.
 
-4.  **Lancer le serveur de développement :**
+---
 
-    ```bash
-    npm start
-    # ou
-    yarn start
-    ```
+## Configuration
 
-    L'application sera accessible sur http://localhost:3000.
+Le fichier `src/calendarConfig.js` centralise toutes les valeurs du projet. C'est le seul fichier à modifier pour adapter Kalendar à votre institution.
 
-## Architecture CSS et Design
+```javascript
+export const calendarConfig = {
+  // Clé API Google Calendar
+  apiKey: "VOTRE_CLE_API",
 
-Le rendu spécifique de la grille (lignes continues pour les heures, tirets pour les quarts d'heure) a été implémenté en surchargeant le thème standard de FullCalendar.
-Les modifications majeures se trouvent dans `src/App.css`.
+  // ID du calendrier Google principal
+  masterCalendarId: "votre-calendrier@group.calendar.google.com",
 
-  - Lignes d'heures pleines : `tr.fc-timegrid-slot:not(.fc-timegrid-slot-minor)`
-  - Interlignes (15, 30, 45) : `tr.fc-timegrid-slot-minor`
-  - Suppression des bordures d'événements : `.fc-v-event`
+  // Textes de l'en-tête
+  header: {
+    prefix: "VOTRE ECOLE",
+    title: "Emploi du Temps",
+    dateText: "Semaine en cours"
+  },
+
+  // Correspondance colorId Google (1 à 11) vers groupe étudiant
+  colorMapping: {
+    "1":       { label: "Groupe A", hex: "#0099ff" },
+    "2":       { label: "Groupe B", hex: "#ff6600" },
+    "3":       { label: "Groupe C", hex: "#666666" },
+    "default": { label: "Général",  hex: "#333333" }
+  }
+};
+```
+
+Assurez-vous que le calendrier Google est configuré en **Public** dans ses paramètres de partage.
+
+---
+
+## Paramètres URL
+
+Tous les réglages sont accessibles via des paramètres dans l'URL. Aucune modification de code n'est nécessaire.
+
+### Calendrier
+
+| Paramètre | Valeurs | Description |
+|---|---|---|
+| `?calId=` | ID Google Calendar | Pointe vers un calendrier différent |
+| `?show=` | ex: `H1` | Affiche uniquement ce groupe |
+| `?title=` | texte libre (max 100 car.) | Remplace le titre de l'en-tête |
+| `?color1=` à `?color11=` | texte libre | Renomme le groupe associé à chaque couleur |
+
+### Affichage
+
+| Paramètre | Valeurs | Défaut |
+|---|---|---|
+| `?theme=` | `light` ou `dark` | `light` |
+| `?lang=` | `fr`, `en`, `mg` | `fr` |
+| `?from=` | `HH:MM` ex: `08:00` | `07:00` |
+| `?to=` | `HH:MM` ex: `17:00` | `18:00` |
+| `?hiddenDays=` | `0,6` (0=dim, 6=sam) | aucun |
+| `?hideBuilder=` | `true` | `false` |
+
+### Exemples
+
+```
+# Emploi du temps du groupe H1 en thème sombre
+https://votre-app.vercel.app/?show=H1&theme=dark
+
+# Plage horaire réduite, sans week-end, en anglais
+https://votre-app.vercel.app/?from=08:00&to=17:00&hiddenDays=0,6&lang=en
+
+# Iframe sans bouton Widget Builder
+https://votre-app.vercel.app/?show=H1&hideBuilder=true
+```
+
+---
+
+## Personnalisation des couleurs
+
+Kalendar utilise un système de CSS Variables à deux couches. Les variables publiques `--cal-*` peuvent être surchargées via l'URL ou via un fichier CSS externe.
+
+### Via l'URL
+
+Le caractère `#` doit être encodé en `%23` dans une URL.
+
+| Paramètre | Variable CSS | Description |
+|---|---|---|
+| `?primaryColor=%23a8cbff` | `--cal-primary` | Couleur du bandeau des jours |
+| `?bgColor=%23ffffff` | `--cal-bg` | Couleur de fond général |
+| `?accentColor=%23eef4ff` | `--cal-accent` | Couleur de la colonne des heures |
+| `?textColor=%23004085` | `--cal-text` | Couleur du texte dans le bandeau |
+| `?fontFamily=Roboto` | `--cal-font` | Police d'écriture |
+| `?cssUrl=https://...` | toutes | URL d'un fichier CSS externe (https uniquement) |
+
+```
+# Thème vert université
+https://votre-app.vercel.app/?primaryColor=%23004d00&bgColor=%23f0fff0&textColor=%23002200
+```
+
+### Via votre propre CSS (intégration React directe)
+
+```css
+.app-container {
+  --cal-primary: #votre-couleur;
+  --cal-bg:      #votre-couleur;
+  --cal-accent:  #votre-couleur;
+  --cal-text:    #votre-couleur;
+  --cal-font:    'Votre Police', sans-serif;
+}
+```
+
+---
+
+## Intégration iframe
+
+### Calendrier complet
+
+```html
+<iframe
+  src="https://votre-app.vercel.app/"
+  width="100%"
+  height="700px"
+  style="border: none; border-radius: 8px;"
+  title="Emploi du temps"
+></iframe>
+```
+
+### Filtré par groupe, thème sombre, sans bouton
+
+```html
+<iframe
+  src="https://votre-app.vercel.app/?show=H1&hideBuilder=true&theme=dark"
+  width="100%"
+  height="700px"
+  style="border: none;"
+  title="Emploi du temps H1"
+></iframe>
+```
+
+---
+
+## API postMessage
+
+Quand Kalendar est intégré en iframe, la page parente peut lui envoyer des commandes sans recharger l'iframe.
+
+### Envoyer une commande
+
+```javascript
+const iframe = document.getElementById("mon-calendrier");
+
+iframe.addEventListener("load", function () {
+
+  // Changer le groupe affiché
+  iframe.contentWindow.postMessage(
+    { type: "KALENDAR_CMD", action: "SET_GROUP", value: "H2" },
+    "*"
+  );
+
+  // Passer en mode sombre
+  iframe.contentWindow.postMessage(
+    { type: "KALENDAR_CMD", action: "SET_THEME", value: "dark" },
+    "*"
+  );
+
+  // Changer la langue
+  iframe.contentWindow.postMessage(
+    { type: "KALENDAR_CMD", action: "SET_LANG", value: "en" },
+    "*"
+  );
+});
+```
+
+### Écouter les confirmations
+
+```javascript
+window.addEventListener("message", function (event) {
+  if (event.data && event.data.type === "KALENDAR_ACK") {
+    if (event.data.ok) {
+      console.log("Commande executee :", event.data.action, "->", event.data.value);
+    } else {
+      console.warn("Commande refusee :", event.data.reason);
+    }
+  }
+});
+```
+
+### Actions disponibles
+
+| Action | Valeurs acceptées |
+|---|---|
+| `SET_GROUP` | n'importe quel label de groupe, ex: `"H1"` |
+| `SET_THEME` | `"light"` ou `"dark"` |
+| `SET_LANG` | `"fr"`, `"en"`, `"mg"` |
+
+---
+
+## API REST
+
+Kalendar expose une API REST via Vercel Serverless Functions, accessible depuis n'importe quelle application.
+
+### Endpoints
+
+```
+GET /api/config
+GET /api/groups
+GET /api/events
+GET /api/events?group=H1
+GET /api/events?group=H1&week=2026-04-21
+```
+
+### GET /api/config
+
+Retourne la configuration publique : groupes et en-tête.
+
+```json
+{
+  "header": { "prefix": "THE", "title": "Holidays in Madagascar" },
+  "groups": [
+    { "id": "1", "label": "H1", "hex": "#0099ff" },
+    { "id": "2", "label": "H4", "hex": "#ff6600" }
+  ]
+}
+```
+
+### GET /api/groups
+
+Retourne uniquement la liste des labels de groupes.
+
+```json
+{ "groups": ["H1", "H4", "G3", "Général"] }
+```
+
+### GET /api/events
+
+Retourne les événements de la semaine.
+
+| Paramètre | Description |
+|---|---|
+| `?group=H1` | Filtre par groupe (insensible à la casse) |
+| `?week=2026-04-21` | Semaine contenant cette date (`YYYY-MM-DD`). Défaut : semaine en cours |
+
+```json
+{
+  "group": "H1",
+  "weekStart": "2026-04-20",
+  "weekEnd": "2026-04-26",
+  "count": 3,
+  "events": [
+    {
+      "id": "abc123",
+      "title": "Mathématiques",
+      "start": "2026-04-21T08:00:00+03:00",
+      "end": "2026-04-21T10:00:00+03:00",
+      "group": "H1",
+      "colorId": "1",
+      "hex": "#0099ff"
+    }
+  ]
+}
+```
+
+### Variables d'environnement requises
+
+Sur Vercel : **Settings → Environment Variables**
+
+```
+GOOGLE_API_KEY       = votre_cle_api_google
+GOOGLE_CALENDAR_ID   = votre_calendar_id@group.calendar.google.com
+```
+
+En local : créer un fichier `.env.local` à la racine avec ces mêmes valeurs.
+
+---
+
+## Configuration externe JSON
+
+Une institution peut réutiliser l'app Vercel déployée sans modifier le code source, en hébergeant son propre fichier JSON de configuration.
+
+```
+https://votre-app.vercel.app/?config=https://monecole.mg/kalendar-config.json
+```
+
+### Format du fichier JSON
+
+Voir `config.example.json` à la racine du projet pour le modèle complet.
+
+```json
+{
+  "apiKey": "VOTRE_CLE_API",
+  "masterCalendarId": "votre-calendrier@group.calendar.google.com",
+  "header": {
+    "prefix": "MON ECOLE",
+    "title": "Emploi du Temps",
+    "dateText": "Semaine en cours"
+  },
+  "colorMapping": {
+    "1":       { "label": "L1 Info", "hex": "#0099ff" },
+    "2":       { "label": "L2 Info", "hex": "#ff6600" },
+    "default": { "label": "Général", "hex": "#333333" }
+  }
+}
+```
+
+### Prérequis CORS
+
+Le serveur hébergeant le fichier JSON doit envoyer cet en-tête HTTP :
+
+```
+Access-Control-Allow-Origin: *
+```
+
+### Priorité des configurations
+
+```
+Paramètre URL individuel (?calId=, ?title=...)
+          >
+Config JSON externe (?config=https://...)
+          >
+calendarConfig.js (config locale)
+```
+
+---
+
+## Progressive Web App
+
+Kalendar est une PWA installable sur mobile et consultable hors-ligne.
+
+### Fonctionnalités
+
+- **Installable** : Chrome et Safari proposent d'ajouter l'app à l'écran d'accueil
+- **Hors-ligne** : la structure de l'app est mise en cache par le Service Worker
+- **Icône native** : s'affiche avec l'icône et le nom "Kalendar" sur l'écran d'accueil
+
+### Stratégie de cache
+
+Le Service Worker applique une stratégie **Cache-First** pour les fichiers statiques. Les données Google Calendar ne sont jamais mises en cache car elles doivent rester fraîches.
+
+### Forcer un rechargement du cache après un déploiement
+
+Dans `public/sw.js`, incrémentez le numéro de version :
+
+```javascript
+const CACHE_NAME = "kalendar-v2"; // était "kalendar-v1"
+```
+
+---
+
+## Widget Builder
+
+Un bouton flottant est disponible sur l'app. Il ouvre une interface pour générer un lien ou un code iframe personnalisé sans écrire de code. Il expose tous les paramètres disponibles avec un aperçu live du résultat.
+
+Pour masquer le bouton dans une intégration :
+
+```
+?hideBuilder=true
+```
+
+---
+
+## Page de documentation
+
+Une page de documentation interactive est accessible directement sur l'app :
+
+```
+https://votre-app.vercel.app/?docs=1
+```
+
+Elle contient le tableau complet des paramètres URL, un builder avec aperçu live, et des exemples copiables pour WordPress, Moodle et d'autres plateformes.
+
+---
+
+## Architecture du projet
+
+```
+Kalendar/
+├── public/
+│   ├── index.html           # Meta tags PWA
+│   ├── manifest.json        # Identité PWA (nom, icones, display mode)
+│   └── sw.js                # Service Worker (cache hors-ligne)
+│
+├── src/
+│   ├── App.js               # Composant principal, logique de rendu
+│   ├── App.css              # Styles + système de CSS Variables (--cal-*)
+│   ├── calendarConfig.js    # Configuration centrale de l'institution
+│   ├── getUrlParams.js      # Lecture et validation de tous les params URL
+│   ├── WidgetBuilder.js     # Interface de génération d'iframe
+│   ├── DocsPage.jsx         # Page de documentation interactive
+│   └── index.js             # Point d'entrée + enregistrement du SW
+│
+├── api/
+│   ├── config.js            # GET /api/config
+│   ├── groups.js            # GET /api/groups
+│   └── events.js            # GET /api/events
+│
+├── config.example.json      # Modèle de configuration externe JSON
+└── package.json
+```
+
+---
 
 ## Licence
 
-Ce projet est sous licence MIT - voir le fichier [LICENSE.md](LICENSE.md) pour plus de détails.
-```
+Ce projet est sous licence MIT. Voir le fichier `LICENSE.md` pour plus de détails.
