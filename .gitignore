@@ -23,3 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 node_modules
 base UI.png
+# Bundle npm (généré par npm run build:lib, ne pas commiter)
+/dist

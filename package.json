@@ -30,7 +30,11 @@
     "./dist/kalendar.css": "./dist/kalendar.css"
   },
   "files": [
-    "dist"
+    "dist/index.es.js",
+    "dist/index.cjs.js",
+    "dist/kalendar.css",
+    "lib/README.npm.md",
+    "lib/README.md"
   ],
   "scripts": {
     "start": "react-scripts start",
@@ -41,27 +45,32 @@
     "prepublishOnly": "npm run build:lib"
   },
   "peerDependencies": {
-    "@fullcalendar/daygrid": ">=6.0.0",
-    "@fullcalendar/google-calendar": ">=6.0.0",
-    "@fullcalendar/react": ">=6.0.0",
-    "@fullcalendar/timegrid": ">=6.0.0",
     "react": ">=17.0.0",
-    "react-dom": ">=17.0.0"
+    "react-dom": ">=17.0.0",
+    "@fullcalendar/react": ">=6.0.0",
+    "@fullcalendar/daygrid": ">=6.0.0",
+    "@fullcalendar/timegrid": ">=6.0.0",
+    "@fullcalendar/google-calendar": ">=6.0.0",
+    "@fullcalendar/core": ">=6.0.0"
   },
   "dependencies": {
     "@fullcalendar/common": "^5.11.5",
-    "@fullcalendar/daygrid": ">=6.0.0",
-    "@fullcalendar/google-calendar": ">=6.0.0",
-    "@fullcalendar/react": ">=6.0.0",
-    "@fullcalendar/timegrid": ">=6.0.0",
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/google-calendar": "^6.1.19",
+    "@fullcalendar/react": "^6.1.19",
+    "@fullcalendar/timegrid": "^6.1.19",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "react": ">=17.0.0",
-    "react-dom": ">=17.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "vite": "^4.5.14",
+    "@vitejs/plugin-react": "^4.3.4"
   },
   "eslintConfig": {
     "extends": [
@@ -81,8 +90,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^4.5.14"
-  }
+  "readme": "lib/README.md"
 }
