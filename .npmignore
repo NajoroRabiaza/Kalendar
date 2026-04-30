@@ -1,0 +1,46 @@
+# .npmignore
+# Ce fichier dit à npm ce qu'il NE FAUT PAS publier sur le registre.
+# Tout ce qui est listé ici sera exclu du package téléchargé
+# par les installateurs.
+#
+# PRINCIPE : on publie uniquement ce dont l'installateur a besoin.
+# Le code source (src/, lib/) et les outils de dev sont inutiles
+# pour quelqu'un qui veut juste utiliser le composant.
+# Seul dist/ (le bundle compilé) est nécessaire.
+
+# Code source de l'app Vercel (pas utile pour npm)
+src/
+public/
+api/
+
+# Code source du composant (le bundle compilé dans dist/ suffit)
+lib/
+
+# Fichiers de configuration de développement
+vite.config.lib.js
+.env.local
+.env*
+
+# Fichiers Git
+.git/
+.gitignore
+
+# Dépendances (l'installateur fait npm install lui-même)
+node_modules/
+
+# Fichiers de tests
+src/App.test.js
+src/setupTests.js
+
+# Fichiers CRA inutiles
+public/
+package-lock.json
+
+# Fichiers Mac
+.DS_Store
+__MACOSX/
+
+# Images et assets non nécessaires
+*.png
+*.svg
+base\ UI.png

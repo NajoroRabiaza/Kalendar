@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+// Avec jsxRuntime: "automatic" dans Vite, React n'a plus besoin
+// d'être importé pour le JSX. On importe uniquement les hooks utilisés.
+import { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -52,7 +54,7 @@ import "./Kalendar.css";
 // ============================================================
 
 // Valeurs par défaut du colorMapping si l'intégrateur n'en fournit pas
-const DEFAULT_COLOR_MAPPING = {
+export const DEFAULT_COLOR_MAPPING = {
   "1":       { label: "Groupe 1", hex: "#0099ff" },
   "2":       { label: "Groupe 2", hex: "#ff6600" },
   "3":       { label: "Groupe 3", hex: "#666666" },
