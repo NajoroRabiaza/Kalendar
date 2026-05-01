@@ -1,6 +1,6 @@
 {
   "name": "@najororabiaza/kalendar",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Composant React d'emploi du temps universitaire connecte a Google Calendar. Personnalisable via CSS Variables, props React, ou parametres URL.",
   "author": "NajoroRabiaza",
   "license": "MIT",
@@ -90,5 +90,10 @@
       "last 1 safari version"
     ]
   },
-  "readme": "lib/README.md"
+  "readme": "lib/README.md",
+  "style": "dist/kalendar.css",
+  "sideEffects": [
+    "dist/kalendar.css",
+    "*.css"
+  ]
 }

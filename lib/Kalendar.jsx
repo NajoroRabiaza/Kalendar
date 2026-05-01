@@ -1,6 +1,7 @@
 // Avec jsxRuntime: "automatic" dans Vite, React n'a plus besoin
 // d'être importé pour le JSX. On importe uniquement les hooks utilisés.
 import { useState, useEffect } from "react";
+import { injectKalendarStyles } from "./injectStyles.js";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -115,6 +116,11 @@ export function Kalendar({
   // ----------------------------------------------------------
   const [currentLang, setCurrentLang] = useState(lang);
   useEffect(() => { setCurrentLang(lang); }, [lang]);
+
+  // Injection automatique du CSS au premier montage du composant.
+  // useEffect sans dépendances = s'exécute une seule fois.
+  // injectKalendarStyles() vérifie elle-même si le style est déjà présent.
+  useEffect(() => { injectKalendarStyles(); }, []);
 
   // ----------------------------------------------------------
   //  Validation des props obligatoires — APRÈS les hooks
