@@ -109,7 +109,15 @@ export function Kalendar({
 }) {
 
   // ----------------------------------------------------------
-  //  Validation des props obligatoires
+  //  RÈGLE HOOKS : useState et useEffect AVANT tout return.
+  //  On déplace les hooks ici, avant la validation des props.
+  //  La validation avec return vient APRÈS.
+  // ----------------------------------------------------------
+  const [currentLang, setCurrentLang] = useState(lang);
+  useEffect(() => { setCurrentLang(lang); }, [lang]);
+
+  // ----------------------------------------------------------
+  //  Validation des props obligatoires — APRÈS les hooks
   //  Si apiKey ou calendarId manquent, on affiche un message
   //  d'erreur clair plutôt que de planter silencieusement.
   // ----------------------------------------------------------
@@ -123,14 +131,6 @@ export function Kalendar({
       </div>
     );
   }
-
-  // ----------------------------------------------------------
-  //  STATE : langue dynamique (peut changer sans recharger)
-  //  On démarre avec la prop lang mais l'intégrateur peut
-  //  changer la langue dynamiquement en modifiant la prop.
-  // ----------------------------------------------------------
-  const [currentLang, setCurrentLang] = useState(lang);
-  useEffect(() => { setCurrentLang(lang); }, [lang]);
 
   // ----------------------------------------------------------
   //  TRANSFORMATION DES ÉVÉNEMENTS
@@ -182,15 +182,19 @@ export function Kalendar({
   //  FullCalendar brut (qui est complexe et interne).
   // ----------------------------------------------------------
   const handleEventClick = (clickInfo) => {
-    if (!onEventClick) return;
-    clickInfo.jsEvent.preventDefault(); // empêche l'ouverture du lien Google
-    onEventClick({
-      title:   clickInfo.event.title,
-      start:   clickInfo.event.start,
-      end:     clickInfo.event.end,
-      group:   clickInfo.event.extendedProps?.groupLabel || null,
-      colorId: clickInfo.event.extendedProps?.colorId    || null,
-    });
+    // On utilise un if explicite plutôt que && court-circuit.
+    // Rollup transforme "u && expr" en une expression que ESLint
+    // signale comme "no-unused-expression". Un if {} évite ça.
+    if (onEventClick) {
+      clickInfo.jsEvent.preventDefault();
+      onEventClick({
+        title:   clickInfo.event.title,
+        start:   clickInfo.event.start,
+        end:     clickInfo.event.end,
+        group:   clickInfo.event.extendedProps?.groupLabel || null,
+        colorId: clickInfo.event.extendedProps?.colorId    || null,
+      });
+    }
   };
 
   // ----------------------------------------------------------

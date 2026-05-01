@@ -137,5 +137,20 @@ export default defineConfig({
     //  après un changement de configuration.
     // ----------------------------------------------------------
     emptyOutDir: true,
+
+    // ----------------------------------------------------------
+    //  minify: false — désactive la minification du bundle.
+    //
+    //  Pourquoi ne pas minifier une librairie ?
+    //  1. Le bundler de l'installateur (webpack, Vite...) se
+    //     chargera de minifier lors de son propre build.
+    //     Minifier deux fois est inutile.
+    //  2. La minification de Rollup transforme if(a){b();c()}
+    //     en a&&(b(),c()) — une forme que ESLint strict refuse
+    //     avec "no-unused-expression".
+    //  3. Sans minification, le code reste lisible dans les
+    //     DevTools de l'installateur (les sourcemaps suffisent).
+    // ----------------------------------------------------------
+    minify: false,
   },
 });
