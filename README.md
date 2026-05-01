@@ -1,8 +1,10 @@
 # Kalendar — Portail d'Emploi du Temps Universitaire
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/NajoroRabiaza/Kalendar)
+[![npm version](https://badge.fury.io/js/@najororabiaza%2Fkalendar.svg)](https://www.npmjs.com/package/@najororabiaza/kalendar)
+[![npm downloads](https://img.shields.io/npm/dm/@najororabiaza/kalendar.svg)](https://www.npmjs.com/package/@najororabiaza/kalendar)
 
-Une application web React qui affiche les emplois du temps universitaires en temps réel, directement synchronisée avec Google Calendar. Conçue pour être réutilisable : n'importe quelle institution peut intégrer Kalendar dans son site existant via une iframe, une API REST, ou un fichier de configuration externe, sans toucher au code source.
+Une application web React qui affiche les emplois du temps universitaires en temps réel, directement synchronisée avec Google Calendar. Conçue pour être réutilisable : n'importe quelle institution peut intégrer Kalendar dans son site existant via une iframe, une API REST, un package npm, ou un fichier de configuration externe, sans toucher au code source.
 
 ---
 
@@ -10,6 +12,7 @@ Une application web React qui affiche les emplois du temps universitaires en tem
 
 - [Objectifs](#objectifs)
 - [Technologies](#technologies)
+- [Package npm](#package-npm)
 - [Installation locale](#installation-locale)
 - [Configuration](#configuration)
 - [Paramètres URL](#paramètres-url)
@@ -34,6 +37,8 @@ Une application web React qui affiche les emplois du temps universitaires en tem
 
 **Pour les intégrateurs :** Un seul déploiement Vercel peut servir plusieurs institutions. Chaque école personnalise son widget via des paramètres URL ou un fichier JSON externe, sans modifier le code.
 
+**Pour les développeurs React :** Le composant est disponible sur npm et s'intègre directement dans n'importe quelle application React avec un contrôle total sur le style et le comportement.
+
 ---
 
 ## Technologies
@@ -45,6 +50,109 @@ Une application web React qui affiche les emplois du temps universitaires en tem
 | Google Calendar API | Source de données des événements |
 | Vercel | Hébergement + Serverless Functions |
 | Service Worker | Cache hors-ligne (PWA) |
+| npm | Distribution du composant React |
+
+---
+
+## Package npm
+
+Kalendar est disponible en tant que package npm pour les développeurs React qui souhaitent intégrer le composant directement dans leur application.
+
+### Installation
+
+```bash
+npm install @najororabiaza/kalendar
+```
+
+### Prérequis (peerDependencies)
+
+```bash
+npm install @fullcalendar/react @fullcalendar/daygrid @fullcalendar/timegrid @fullcalendar/google-calendar @fullcalendar/core
+```
+
+### Utilisation de base
+
+```jsx
+import { Kalendar } from "@najororabiaza/kalendar";
+
+function App() {
+  return (
+    <Kalendar
+      apiKey="VOTRE_CLE_API_GOOGLE"
+      calendarId="votre-calendrier@group.calendar.google.com"
+    />
+  );
+}
+```
+
+Le CSS est injecté automatiquement. Aucun import supplémentaire n'est nécessaire.
+
+### Props disponibles
+
+| Prop | Type | Défaut | Description |
+|---|---|---|---|
+| `apiKey` | string | requis | Clé API Google Calendar |
+| `calendarId` | string | requis | ID du calendrier Google |
+| `theme` | string | `"light"` | `"light"` ou `"dark"` |
+| `lang` | string | `"fr"` | `"fr"`, `"en"`, `"mg"` |
+| `from` | string | `"07:00:00"` | Heure de début |
+| `to` | string | `"18:00:00"` | Heure de fin |
+| `hiddenDays` | array | `[]` | Jours masqués ex: `[0, 6]` |
+| `colorMapping` | object | défaut | Correspondance colorId → groupe |
+| `group` | string | `null` | Filtre par groupe ex: `"H1"` |
+| `headerPrefix` | string | `""` | Préfixe de l'en-tête |
+| `headerTitle` | string | `"Emploi du Temps"` | Titre de l'en-tête |
+| `headerRight` | string | `""` | Texte à droite de l'en-tête |
+| `showHeader` | bool | `true` | Affiche l'en-tête |
+| `style` | object | `{}` | CSS Variables inline |
+| `className` | string | `""` | Classe CSS supplémentaire |
+| `onEventClick` | function | `null` | Callback au clic sur un événement |
+
+### Personnalisation via CSS Variables
+
+```jsx
+<Kalendar
+  apiKey="..."
+  calendarId="..."
+  style={{
+    "--kal-primary":  "#b30000",
+    "--kal-bg":       "#1a1a1a",
+    "--kal-accent":   "#2a2a2a",
+    "--kal-text":     "#ffcccc",
+    "--kal-font":     "'Georgia', serif",
+  }}
+/>
+```
+
+### Groupes personnalisés
+
+```jsx
+import { Kalendar, DEFAULT_COLOR_MAPPING } from "@najororabiaza/kalendar";
+
+<Kalendar
+  apiKey="..."
+  calendarId="..."
+  colorMapping={{
+    ...DEFAULT_COLOR_MAPPING,
+    "1": { label: "Licence 1", hex: "#b30000" },
+    "2": { label: "Master 2",  hex: "#004d00" },
+  }}
+/>
+```
+
+### Réagir au clic sur un événement
+
+```jsx
+<Kalendar
+  apiKey="..."
+  calendarId="..."
+  onEventClick={({ title, start, end, group }) => {
+    console.log(`Cours : ${title}, Groupe : ${group}`);
+  }}
+/>
+```
+
+Pour la documentation complète du package npm, voir [npmjs.com/@najororabiaza/kalendar](https://www.npmjs.com/package/@najororabiaza/kalendar).
 
 ---
 
@@ -75,6 +183,13 @@ npm start
 ```
 
 L'application sera accessible sur `http://localhost:3000`.
+
+### Compiler le package npm en local
+
+```bash
+npm run build:lib
+# Génère dist/index.es.js, dist/index.cjs.js, dist/kalendar.css
+```
 
 ---
 
@@ -467,6 +582,19 @@ Kalendar/
 │   ├── groups.js            # GET /api/groups
 │   └── events.js            # GET /api/events
 │
+├── lib/                     # Package npm @najororabiaza/kalendar
+│   ├── Kalendar.jsx         # Composant React pur (props uniquement)
+│   ├── Kalendar.css         # Styles avec 25 CSS Variables exposées
+│   ├── injectStyles.js      # Injection automatique du CSS dans le DOM
+│   ├── index.js             # Point d'entrée du package
+│   └── README.md            # Documentation du package npm
+│
+├── dist/                    # Bundle compilé (généré par npm run build:lib)
+│   ├── index.es.js          # Format ES Modules
+│   ├── index.cjs.js         # Format CommonJS
+│   └── kalendar.css         # CSS compilé
+│
+├── vite.config.lib.js       # Configuration Vite pour le build npm
 ├── config.example.json      # Modèle de configuration externe JSON
 └── package.json
 ```
