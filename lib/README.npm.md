@@ -19,6 +19,40 @@ npm install @fullcalendar/react @fullcalendar/daygrid @fullcalendar/timegrid @fu
 
 ---
 
+## Compatibilité SSR (Next.js, Remix)
+
+Ce composant accède au DOM via `useEffect` pour injecter ses styles automatiquement.
+Il est incompatible avec les React Server Components.
+
+Dans Next.js 13+ avec l'App Router, vous devez l'encapsuler dans un composant client :
+
+```jsx
+// components/MonCalendrier.jsx
+"use client";
+import { Kalendar } from "@najororabiaza/kalendar";
+export default Kalendar;
+```
+
+Puis l'utiliser normalement dans vos pages :
+
+```jsx
+import MonCalendrier from "@/components/MonCalendrier";
+
+export default function Page() {
+  return (
+    <MonCalendrier
+      apiKey="VOTRE_CLE_API_GOOGLE"
+      calendarId="votre-calendrier@group.calendar.google.com"
+    />
+  );
+}
+```
+
+Dans Remix, le composant fonctionne sans configuration particulière car Remix
+gère automatiquement l'hydratation côté client.
+
+---
+
 ## Utilisation de base
 
 ```jsx
@@ -167,7 +201,7 @@ import { Kalendar, DEFAULT_COLOR_MAPPING } from "@najororabiaza/kalendar";
 
 ## CSS Variables — liste complète
 
-Toutes les variables sont surchargeable depuis votre CSS ou via la prop `style`.
+Toutes les variables sont surchargeables depuis votre CSS ou via la prop `style`.
 
 ```css
 .mon-conteneur {
