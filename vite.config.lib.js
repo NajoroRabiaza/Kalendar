@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import dts from "vite-plugin-dts";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -10,15 +11,21 @@ const __dirname  = dirname(__filename);
 export default defineConfig({
   plugins: [
     react({ jsxRuntime: "automatic" }),
+    dts({
+      include:     ["lib/**/*"],
+      entryRoot:   "lib",
+      outDir:      "dist",
+      tsconfigPath: "./tsconfig.lib.json",
+    }),
   ],
 
   publicDir: false,
 
   build: {
     lib: {
-      entry:   resolve(__dirname, "lib/index.js"),
-      name:    "Kalendar",
-      formats: ["es", "cjs"],
+      entry:    resolve(__dirname, "lib/index.ts"),
+      name:     "Kalendar",
+      formats:  ["es", "cjs"],
       fileName: (format) => `index.${format}.js`,
     },
 
@@ -36,17 +43,17 @@ export default defineConfig({
         "@fullcalendar/core/locales/en-gb",
       ],
       output: {
-        exports: "named",
+        exports:        "named",
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === "style.css") return "kalendar.css";
-          return assetInfo.name;
+          return assetInfo.name ?? "asset";
         },
       },
     },
 
-    outDir: "dist",
-    sourcemap: true,
+    outDir:      "dist",
+    sourcemap:   true,
     emptyOutDir: true,
-    minify: false,
+    minify:      false,
   },
 });
