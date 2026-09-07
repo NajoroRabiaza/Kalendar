@@ -7,12 +7,11 @@ import googleCalendarPlugin from "@fullcalendar/google-calendar";
 import frLocale from "@fullcalendar/core/locales/fr";
 import enLocale from "@fullcalendar/core/locales/en-gb";
 import type { EventInput } from "@fullcalendar/core";
+import { transformEventData, formatDayHeader } from "./utils.js";
 import "./Kalendar.css";
 
-//  Types internes
-
-type Theme = "light" | "dark";
-type Lang  = "fr" | "en" | "mg";
+//  Types publics
+export type { Lang } from "./utils.js";
 
 export interface ColorMapping {
   label: string;
@@ -30,8 +29,8 @@ export interface KalendarEventClickPayload {
 export interface KalendarProps {
   apiKey:        string;
   calendarId:    string;
-  theme?:        Theme;
-  lang?:         Lang;
+  theme?:        "light" | "dark";
+  lang?:         "fr" | "en" | "mg";
   from?:         string;
   to?:           string;
   hiddenDays?:   number[];
@@ -48,7 +47,6 @@ export interface KalendarProps {
 }
 
 //  Constantes
-
 export const DEFAULT_COLOR_MAPPING: Record<string, ColorMapping> = {
   "1":       { label: "Groupe 1",  hex: "#0099ff" },
   "2":       { label: "Groupe 2",  hex: "#ff6600" },
@@ -62,12 +60,6 @@ export const DEFAULT_COLOR_MAPPING: Record<string, ColorMapping> = {
   "10":      { label: "Groupe 10", hex: "#336600" },
   "11":      { label: "Groupe 11", hex: "#663300" },
   "default": { label: "General",   hex: "#333333" },
-};
-
-const JOURS: Record<Lang, string[]> = {
-  fr: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
-  en: ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
-  mg: ["Alah.", "Alats.", "Tal.", "Alar.", "Alak.", "Zom.", "Sab."],
 };
 
 //  Composant
@@ -91,7 +83,7 @@ export function Kalendar({
   onEventClick = undefined,
 }: KalendarProps): React.ReactElement {
 
-  const [currentLang, setCurrentLang] = useState<Lang>(lang);
+  const [currentLang, setCurrentLang] = useState<"fr" | "en" | "mg">(lang);
 
   useEffect(() => { setCurrentLang(lang); }, [lang]);
   useEffect(() => { injectKalendarStyles(); }, []);
@@ -107,28 +99,8 @@ export function Kalendar({
     );
   }
 
-  //  EventInput est le type officiel de FullCalendar pour
-  //  les donnees d'evenement. Il accepte un index signature
-  //  [extendedProp: string]: any ce qui nous permet d'ajouter
-  //  backgroundColor, borderColor, groupLabel, etc.
-  //  EventInputTransformer attend EventInput en retour —
-  //  on ne peut pas retourner false pour masquer un evenement
-  //  via ce callback. On utilise display: "none" a la place.
   const handleEventDataTransform = (eventData: EventInput): EventInput => {
-    const rawColorId = (eventData.colorId as string) || "default";
-    const groupInfo  = colorMapping[rawColorId] ?? colorMapping["default"] ?? { label: "?", hex: "#999" };
-
-    if (group && groupInfo.label !== group) {
-      return { ...eventData, display: "none" };
-    }
-
-    return {
-      ...eventData,
-      backgroundColor: groupInfo.hex,
-      borderColor:     "white",
-      textColor:       "white",
-      groupLabel:      groupInfo.label,
-    };
+    return transformEventData(eventData, colorMapping, group);
   };
 
   const renderEventContent = (eventInfo: {
@@ -176,8 +148,7 @@ export function Kalendar({
   };
 
   const renderDayHeader = (args: { date: Date }): string => {
-    const noms = JOURS[currentLang] ?? JOURS["fr"];
-    return `${noms[args.date.getDay()]} ${args.date.getDate()}/${args.date.getMonth() + 1}`;
+    return formatDayHeader(args.date, currentLang);
   };
 
   const fcLocale = currentLang === "mg" ? "fr" : currentLang;
