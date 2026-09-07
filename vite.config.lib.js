@@ -12,9 +12,10 @@ export default defineConfig({
   plugins: [
     react({ jsxRuntime: "automatic" }),
     dts({
-      include:     ["lib/**/*"],
-      entryRoot:   "lib",
-      outDir:      "dist",
+      include:      ["lib/**/*"],
+      exclude:      ["lib/**/*.test.ts"],
+      entryRoot:    "lib",
+      outDir:       "dist",
       tsconfigPath: "./tsconfig.lib.json",
     }),
   ],
