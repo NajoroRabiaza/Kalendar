@@ -4,7 +4,7 @@
   "description": "Composant React d'emploi du temps universitaire connecte a Google Calendar. Personnalisable via CSS Variables, props React, ou parametres URL.",
   "author": "NajoroRabiaza",
   "license": "MIT",
-  "homepage": "https://github.com/NajoroRabiaza/Kalendar#readme",
+  "homepage": ".",
   "repository": {
     "type": "git",
     "url": "https://github.com/NajoroRabiaza/Kalendar.git"
@@ -40,11 +40,13 @@
     "lib/README.md"
   ],
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "build:lib": "vite build --config vite.config.lib.js",
+    "start":          "react-scripts start",
+    "build":          "react-scripts build",
+    "test":           "react-scripts test",
+    "test:lib":       "vitest run --config vitest.config.ts",
+    "test:lib:watch": "vitest --config vitest.config.ts",
+    "eject":          "react-scripts eject",
+    "build:lib":      "vite build --config vite.config.lib.js",
     "prepublishOnly": "pnpm run build:lib"
   },
   "peerDependencies": {
@@ -69,6 +71,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
     "@vitejs/plugin-react": "^4.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -76,6 +79,7 @@
     "typescript": "^5.8.3",
     "vite": "^6.4.3",
     "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.0.0",
     "web-vitals": "^2.1.4"
   },
   "eslintConfig": {
