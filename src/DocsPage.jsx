@@ -111,7 +111,7 @@ const URL_PARAMS = [
   {
     param: "cssUrl",
     type: "URL https://",
-    defaut: "—",
+    defaut: "-",
     exemple: "https://monsite.com/cal.css",
     description: "Injecte une feuille CSS externe. Doit commencer par https://. Surcharge toutes les variables.",
   },
@@ -288,12 +288,12 @@ export default function MonPage() {
             <h1>Documentation Kalendar</h1>
             <p>
               Intégrez un emploi du temps Google Calendar dans n'importe quel site ou CMS,
-              sans backend, sans inscription — juste une URL ou un <code>&lt;iframe&gt;</code>.
+              sans backend, sans inscription - juste une URL ou un <code>&lt;iframe&gt;</code>.
             </p>
           </header>
 
           {/*
-              SECTION 1 — WIDGET BUILDER
+              SECTION 1 - WIDGET BUILDER
           */}
           <section id="builder" className="docs-section">
             <h2>Widget Builder</h2>
@@ -469,7 +469,7 @@ export default function MonPage() {
           </section>
 
           {/*
-              SECTION 2 — EXEMPLES D'INTÉGRATION
+              SECTION 2 - EXEMPLES D'INTÉGRATION
            */}
           <section id="exemples" className="docs-section">
             <h2>Exemples d'intégration</h2>
@@ -519,7 +519,7 @@ export default function MonPage() {
           </section>
 
           {/* 
-              SECTION 3 — TABLEAU DES PARAMÈTRES
+              SECTION 3 - TABLEAU DES PARAMÈTRES
            */}
           <section id="params" className="docs-section">
             <h2>Paramètres URL</h2>
@@ -554,7 +554,7 @@ export default function MonPage() {
             </div>
 
             <div className="params-tip">
-              <strong>⚠️ Couleurs dans l'URL</strong> — Le caractère <code>#</code> est réservé en URL.
+              <strong>⚠️ Couleurs dans l'URL</strong> - Le caractère <code>#</code> est réservé en URL.
               Il doit être encodé en <code>%23</code>. Exemple&nbsp;: <code>#0099ff</code> → <code>%230099ff</code>.
               Le Widget Builder gère cet encodage automatiquement.
             </div>
@@ -565,7 +565,7 @@ export default function MonPage() {
           */}
           <footer className="docs-footer">
             <p>
-              Kalendar — projet open source par{" "}
+              Kalendar - projet open source par{" "}
               <a href="https://github.com/NajoroRabiaza" target="_blank" rel="noreferrer">NajoroRabiaza</a>.
             </p>
           </footer>

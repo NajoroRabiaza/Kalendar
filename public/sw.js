@@ -43,7 +43,7 @@ const RESSOURCES_A_PRECACHER = [
 ];
 
 
-//  etape 1 — INSTALLATION
+//  etape 1 - INSTALLATION
 //
 //  event.waitUntil() dit au navigateur :
 //  "n'arrête pas l'installation tant que cette promesse
@@ -70,7 +70,7 @@ self.addEventListener("install", (event) => {
 });
 
 
-//  etape 2 — ACTIVATION
+//  etape 2 - ACTIVATION
 //
 //  C'est ici qu'on nettoie les anciens caches.
 //  Si CACHE_NAME est passé de "kalendar-v1" à "kalendar-v2",
@@ -100,7 +100,7 @@ self.addEventListener("activate", (event) => {
 });
 
 
-//  etape 3 — INTERCEPTION DES REQUÊTES (fetch)
+//  etape 3 - INTERCEPTION DES REQUÊTES (fetch)
 //
 //  C'est le cœur du Service Worker.
 //  Chaque fois que l'app fait une requête réseau

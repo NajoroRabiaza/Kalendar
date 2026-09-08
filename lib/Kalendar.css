@@ -74,7 +74,7 @@
 
 
 /* ============================================================
-   VALEURS PAR DÉFAUT — THÈME CLAIR
+   VALEURS PAR DÉFAUT - THÈME CLAIR
    ============================================================ */
 .kal-container {
   /* Couleurs principales */
@@ -126,7 +126,7 @@
 
 
 /* ============================================================
-   THÈME SOMBRE — active les variables --kal-dark-* définies
+   THÈME SOMBRE - active les variables --kal-dark-* définies
    ci-dessus. L'installateur peut surcharger les --kal-dark-*
    pour personnaliser son propre mode sombre.
    ============================================================ */
@@ -288,7 +288,7 @@
 
 
 /* ============================================================
-   FOND AUJOURD'HUI — désactive le jaune FullCalendar par défaut
+   FOND AUJOURD'HUI - désactive le jaune FullCalendar par défaut
    ============================================================ */
 .kal-container .fc-day-today {
   background-color: transparent !important;

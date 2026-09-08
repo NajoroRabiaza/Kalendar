@@ -26,7 +26,7 @@ export default function WidgetBuilder({ onClose }) {
   const [color2, setColor2] = useState("");
   const [color3, setColor3] = useState("");
 
-  //  POINT 4 — Couleurs personnalisées
+  //  POINT 4 - Couleurs personnalisées
   const [activerPrimary,setActiverPrimary]= useState(false);
   const [activerBg,setActiverBg]= useState(false);
   const [activerAccent,setActiverAccent]= useState(false);
@@ -39,16 +39,16 @@ export default function WidgetBuilder({ onClose }) {
   const [textColor,setTextColor]= useState("#004085");
   const [fontFamily,setFontFamily]= useState("Arial");
 
-  // POINT 4 — CSS externe
+  // POINT 4 - CSS externe
   const [cssUrl, setCssUrl] = useState("");
 
-  //  POINT 7 — APERCU EN DIRECT
+  //  POINT 7 - APERCU EN DIRECT
   //
   //  Deux états distincts :
-  //  showPreview : booleen — true = le panneau apercu est
+  //  showPreview : booleen - true = le panneau apercu est
   //   visible dans la modale.
   //
-  //  previewUrl : string — l'URL figee au moment ou
+  //  previewUrl : string - l'URL figee au moment ou
   //   l'utilisateur a clique sur "Actualiser".
   //   On ne pointe PAS directement sur generatedUrl
   //   dans le src de l'iframe pour deux raisons :
@@ -123,7 +123,7 @@ export default function WidgetBuilder({ onClose }) {
     });
   };
 
-  //  POINT 7 — Handlers de l'apercu
+  //  POINT 7 - Handlers de l'apercu
   //
   //  lancerApercu : appelee au premier clic sur "Apercu en
   //  direct". Active le panneau ET charge l'URL courante.
@@ -372,7 +372,7 @@ export default function WidgetBuilder({ onClose }) {
           <textarea readOnly value={iframeCode} style={styles.textarea} onClick={e => e.target.select()} />
 
           {/* 
-              POINT 7 — BOUTON D'APERCU EN DIRECT
+              POINT 7 - BOUTON D'APERCU EN DIRECT
               Positionne juste apres les champs de resultat.
               L'utilisateur a configure son widget et veut voir
               le rendu final avant de copier le code.
@@ -396,7 +396,7 @@ export default function WidgetBuilder({ onClose }) {
         </div>
 
         {/*
-            POINT 7 — PANNEAU D'APERCU EN DIRECT
+            POINT 7 - PANNEAU D'APERCU EN DIRECT
             Ce bloc n'est rendu que si showPreview === true.
             key={previewUrl} force la recreation de l'iframe
             a chaque clic sur Actualiser.
@@ -574,7 +574,7 @@ const styles = {
     borderRadius: "6px", border: "1px solid #c0d0ff", fontSize: "12px",
   },
 
-  //  POINT 7 — Styles du panneau d'apercu
+  //  POINT 7 - Styles du panneau d'apercu
   previewBtn: {
     padding: "9px 20px", backgroundColor: "#111", color: "white",
     border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px",

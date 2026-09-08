@@ -131,7 +131,7 @@ export declare const DEFAULT_COLOR_MAPPING: Record<string, ColorMapping>;
 
 /**
  * Composant principal Kalendar.
- * Export nomme — usage recommande :
+ * Export nomme - usage recommande :
  *   import { Kalendar } from "@najororabiaza/kalendar";
  */
 export declare function Kalendar(props: KalendarProps): React.ReactElement;

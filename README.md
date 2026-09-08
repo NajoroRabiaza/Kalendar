@@ -1,4 +1,4 @@
-# Kalendar — Portail d'Emploi du Temps Universitaire
+# Kalendar - Portail d'Emploi du Temps Universitaire
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/NajoroRabiaza/Kalendar)
 [![npm version](https://badge.fury.io/js/@najororabiaza%2Fkalendar.svg)](https://www.npmjs.com/package/@najororabiaza/kalendar)

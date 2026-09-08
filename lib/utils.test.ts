@@ -114,11 +114,11 @@ describe("transformEventData", () => {
 
 describe("formatDayHeader", () => {
 
-  // Lundi 1 septembre 2025 — getDay() = 1
+  // Lundi 1 septembre 2025 - getDay() = 1
   const lundi    = new Date(2025, 8, 1);
-  // Mercredi 3 septembre 2025 — getDay() = 3
+  // Mercredi 3 septembre 2025 - getDay() = 3
   const mercredi = new Date(2025, 8, 3);
-  // Dimanche 7 septembre 2025 — getDay() = 0
+  // Dimanche 7 septembre 2025 - getDay() = 0
   const dimanche = new Date(2025, 8, 7);
 
   describe("langue francaise", () => {

@@ -1,5 +1,5 @@
 /*
-   App.css — Système de thèmes à deux couches
+   App.css - Système de thèmes à deux couches
 
    COUCHE 1 : Variables publiques  (--cal-*)
    Ce sont les variables que l'INTÉGRATEUR peut surcharger.
@@ -54,7 +54,7 @@
   
   
   /*
-     THÈME SOMBRE — surcharge uniquement les variables publiques.
+     THÈME SOMBRE - surcharge uniquement les variables publiques.
      Les variables internes se mettent à jour automatiquement
      car elles lisent via var(--cal-*).
      */
@@ -205,7 +205,7 @@
   
   
   /*
-     FOND "AUJOURD'HUI" — on désactive le jaune par défaut
+     FOND "AUJOURD'HUI" - on désactive le jaune par défaut
      */
   .fc-day-today { background-color: transparent !important; }
   

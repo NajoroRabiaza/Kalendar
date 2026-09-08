@@ -199,7 +199,7 @@ import { Kalendar, DEFAULT_COLOR_MAPPING } from "@najororabiaza/kalendar";
 
 ---
 
-## CSS Variables — liste complète
+## CSS Variables - liste complète
 
 Toutes les variables sont surchargeables depuis votre CSS ou via la prop `style`.
 

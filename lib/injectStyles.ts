@@ -21,7 +21,7 @@ export function injectKalendarStyles(): void {
   style.id = "kalendar-styles";
   style.textContent = `
 /*
-   VALEURS PAR DEFAUT — THEME CLAIR
+   VALEURS PAR DEFAUT - THEME CLAIR
    */
 .kal-container {
   --kal-bg:                   #ffffff;
