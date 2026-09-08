@@ -262,7 +262,7 @@ export default function MonPage() {
   // Rendu
   return (
     <div className="docs-root">
-      {/* ── NAV ── */}
+      {/* NAV */}
       <nav className="docs-nav">
         <div className="docs-nav-brand">
           <span>Kalendar</span>
@@ -272,7 +272,7 @@ export default function MonPage() {
       </nav>
 
       <div className="docs-layout">
-        {/* ── SIDEBAR ── */}
+        {/* SIDEBAR */}
         <aside className="docs-sidebar">
           <ul>
             <li><a href="#builder">Widget Builder</a></li>
@@ -282,7 +282,7 @@ export default function MonPage() {
           </ul>
         </aside>
 
-        {/* ── CONTENU ── */}
+        {/* CONTENU */}
         <main className="docs-main">
           <header className="docs-hero">
             <h1>Documentation Kalendar</h1>
@@ -300,7 +300,7 @@ export default function MonPage() {
             <p>Configurez votre widget et obtenez instantanément l'URL et le code iframe.</p>
 
             <div className="builder-grid">
-              {/* ── Colonne gauche : formulaire ── */}
+              {/* Colonne gauche : formulaire */}
               <div className="builder-form">
 
                 <BuilderSection titre="Calendrier">
