@@ -414,10 +414,10 @@ export default function MonPage() {
                       <strong>Contenu suggéré pour votre fichier CSS&nbsp;:</strong>
                       <pre>{`.app-container {
                         --cal-primary:  #votre-couleur;
-                        --cal-bg:       #votre-couleur;
-                        --cal-accent:   #votre-couleur;
-                        --cal-text:     #votre-couleur;
-                        --cal-font:     'Votre Police', sans-serif;
+                        --cal-bg: #votre-couleur;
+                        --cal-accent: #votre-couleur;
+                        --cal-text: #votre-couleur;
+                        --cal-font: 'Votre Police', sans-serif;
                         }`}</pre>
                     </div>
                   )}
