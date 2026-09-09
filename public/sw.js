@@ -27,7 +27,7 @@
 // Quand on veut forcer un rechargement complet du cache
 // (ex: après un déploiement), il suffit de changer ce nom
 // (ex: "kalendar-v2") et l'ancien cache sera supprimé.
-const CACHE_NAME = "kalendar-v1";
+const CACHE_NAME = "kalendar-v2";
 
 // Liste des ressources à mettre en cache immédiatement
 // lors de l'installation du Service Worker.
