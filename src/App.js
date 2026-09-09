@@ -12,9 +12,16 @@ import WidgetBuilder from "./WidgetBuilder";
 import getUrlParams from "./getUrlParams";
 import DocsPage from "./DocsPage";
 
-// Import depuis lib/ pour garantir un comportement identique
-// entre l'application de demo et le package npm publie.
-import { transformEventData, JOURS } from "../lib/utils";
+// JOURS est defini ici pour l'app CRA.
+// La meme constante existe dans lib/utils.ts pour le package npm.
+// CRA interdit les imports hors de src/, donc on ne peut pas
+// importer directement depuis lib/.
+// Les deux doivent rester synchronises manuellement.
+const JOURS = {
+  fr: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
+  en: ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
+  mg: ["Alah.", "Alats.", "Tal.", "Alar.", "Alak.", "Zom.", "Sab."],
+};
 
 export default function App() {
   const [showBuilder, setShowBuilder] = useState(false);
@@ -170,18 +177,28 @@ export default function App() {
   const headerTitle = urlParams.title || config.header.title;
 
   // ----------------------------------------------------------
-  //  On utilise transformEventData depuis lib/utils.ts
-  //  au lieu de reimplementer la logique localement.
-  //  Cela garantit que l'app de demo et le package npm
-  //  ont un comportement rigoureusement identique.
-  //
-  //  NOTE : transformEventData retourne { display: "none" }
-  //  pour masquer un evenement, contrairement a l'ancienne
-  //  version qui retournait false. Les deux approches
-  //  fonctionnent dans FullCalendar v6.
+  //  handleEventDataTransform est aligne sur la logique de
+  //  transformEventData dans lib/utils.ts.
+  //  CRA interdisant les imports hors de src/, on ne peut pas
+  //  importer directement. Les deux implementations doivent
+  //  rester synchronisees. La migration vers un monorepo
+  //  (Action K future) eliminera cette contrainte.
   // ----------------------------------------------------------
   const handleEventDataTransform = (eventData) => {
-    return transformEventData(eventData, activeMapping, dynamicShow);
+    const rawColorId = eventData.colorId || "default";
+    const groupInfo  = activeMapping[rawColorId] || activeMapping["default"] || { label: "?", hex: "#999" };
+
+    if (dynamicShow && groupInfo.label !== dynamicShow) {
+      return { ...eventData, display: "none" };
+    }
+
+    return {
+      ...eventData,
+      backgroundColor: groupInfo.hex,
+      borderColor:     "white",
+      textColor:       "white",
+      groupLabel:      groupInfo.label,
+    };
   };
 
   const renderEventContent = (eventInfo) => {
@@ -198,10 +215,6 @@ export default function App() {
     );
   };
 
-  // ----------------------------------------------------------
-  //  On utilise JOURS depuis lib/utils.ts
-  //  au lieu de le redefinir localement une troisieme fois.
-  // ----------------------------------------------------------
   const renderDayHeader = (args) => {
     const noms = JOURS[dynamicLang] || JOURS["fr"];
     return `${noms[args.date.getDay()]} ${args.date.getDate()}/${args.date.getMonth() + 1}`;
