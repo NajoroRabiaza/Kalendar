@@ -12,54 +12,25 @@ import WidgetBuilder from "./WidgetBuilder";
 import getUrlParams from "./getUrlParams";
 import DocsPage from "./DocsPage";
 
-export default function App() {
-  // RÈGLE FONDAMENTALE DE REACT :
-  // Tous les hooks doivent être appelés INCONDITIONNELLEMENT,
-  // tout en haut du composant, avant tout return anticipé.
-  // C'est la "Rules of Hooks".
+// Import depuis lib/ pour garantir un comportement identique
+// entre l'application de demo et le package npm publie.
+import { transformEventData, JOURS } from "../lib/utils";
 
+export default function App() {
   const [showBuilder, setShowBuilder] = useState(false);
 
-  // Lecture unique de tous les paramètres URL
   const urlParams = getUrlParams();
 
-  // postMessage API :
-  // Ces trois states permettent au site parent de changer
-  // dynamiquement le groupe affiché, le thème et la langue
-  // SANS recharger l'iframe. La valeur initiale vient de
-  // l'URL (?show=H1) ; elle peut ensuite être écrasée par
-  // un message postMessage de la page parente.
   const [dynamicShow,  setDynamicShow]  = useState(urlParams.show);
   const [dynamicTheme, setDynamicTheme] = useState(urlParams.theme);
   const [dynamicLang,  setDynamicLang]  = useState(urlParams.lang);
 
-  // Routing minimal : ?docs=1 = page de documentation
   const isDocsPage = new URLSearchParams(window.location.search).get("docs") === "1";
 
-  // CONFIGURATION EXTERNE (?config=https://...)
-  //
-  // Principe : une école peut héberger un fichier JSON sur
-  // son propre serveur et passer son URL via ?config=.
-  // L'app Vercel déployée récupère ce JSON au démarrage
-  // et l'utilise à la place de calendarConfig.js.
-  // Cela permet une réutilisation SANS modifier le code
-  // et SANS redéployer : un seul déploiement Vercel sert
-  // toutes les écoles qui hébergent leur propre config.json.
-  //
-  // externalConfig démarre à null (= pas encore chargé).
-  // Une fois le fetch terminé, il contient l'objet JSON
-  // ou reste null si le fetch a échoué.
-  //
-  // configLoading = true tant que le fetch est en cours.
-  // configError   = message d'erreur si le fetch a échoué.
   const [externalConfig, setExternalConfig] = useState(null);
   const [configLoading,  setConfigLoading]  = useState(!!urlParams.configUrl);
   const [configError,    setConfigError]    = useState(null);
 
-  // useEffect : INJECTION DE LA FEUILLE CSS EXTERNE
-  // Si ?cssUrl=https://... est fourni dans l'URL, on crée
-  // dynamiquement un élément <link> dans le <head>.
-  // useEffect s'exécute UNE SEULE FOIS après le premier rendu.
   useEffect(() => {
     if (!urlParams.cssUrl) return;
 
@@ -79,26 +50,6 @@ export default function App() {
     };
   }, [urlParams.cssUrl]);
 
-  // useEffect : FETCH DU FICHIER JSON DE CONFIGURATION
-  //
-  // Ce useEffect se déclenche UNE SEULE FOIS au montage
-  // (si configUrl est présent dans l'URL).
-  //
-  // Le JSON attendu suit la structure de calendarConfig.js.
-  // Les clés absentes sont ignorées : l'app garde la valeur
-  // de calendarConfig comme fallback pour chaque champ.
-  // Voir config.example.json à la racine du projet.
-  //
-  // Pourquoi fetch() et pas import() ?
-  // Parce que l'URL est inconnue au moment de la compilation.
-  // Elle n'est connue qu'à l'exécution via l'URL.
-  // fetch() est la bonne primitive pour ça.
-  //
-  // Gestion des erreurs :
-  // fetch() ne rejette PAS les erreurs HTTP (404, 403...).
-  // On vérifie response.ok manuellement.
-  // Si le fetch échoue, on affiche un message clair.
-  // L'app ne plante pas : elle continue avec calendarConfig.
   useEffect(() => {
     if (!urlParams.configUrl) return;
 
@@ -125,14 +76,6 @@ export default function App() {
       });
   }, [urlParams.configUrl]);
 
-  // useEffect : ECOUTE DES COMMANDES POSTMESSAGE
-  //
-  // La page parente peut appeler :
-  // iframeEl.contentWindow.postMessage(payload, "*")
-  // Format attendu :
-  // { type: "KALENDAR_CMD", action: "SET_GROUP", value: "H2" }
-  // { type: "KALENDAR_CMD", action: "SET_THEME", value: "dark" }
-  // { type: "KALENDAR_CMD", action: "SET_LANG",  value: "en"  }
   useEffect(() => {
     const THEMES_VALIDES  = ["light", "dark"];
     const LANGUES_VALIDES = ["fr", "en", "mg"];
@@ -173,15 +116,8 @@ export default function App() {
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  // Return anticipé APRÈS tous les hooks.
   if (isDocsPage) return <DocsPage />;
 
-  // AFFICHAGE PENDANT LE CHARGEMENT DU JSON
-  //
-  // Si ?config= est dans l'URL, on attend le fetch avant
-  // d'afficher le calendrier. Sinon on afficherait le
-  // calendrier avec calendarConfig puis il se rechargerait
-  // avec la config externe, ce qui est visuellement perturbant.
   if (configLoading) {
     return (
       <div style={stylesChargement.container}>
@@ -191,12 +127,6 @@ export default function App() {
     );
   }
 
-  // AFFICHAGE EN CAS D'ERREUR DE CHARGEMENT
-  //
-  // On affiche un message clair avec la cause de l'erreur.
-  // Les deux causes les plus courantes sont :
-  //  1. Le fichier n'existe pas (404)
-  //  2. Le serveur n'a pas CORS activé (Access-Control-Allow-Origin)
   if (configError) {
     return (
       <div style={stylesChargement.container}>
@@ -210,18 +140,6 @@ export default function App() {
     );
   }
 
-  // FUSION DES CONFIGS : externe (JSON) + locale (calendarConfig)
-  //
-  // On construit un objet "config" final en deux couches :
-  // 1. calendarConfig  : base locale, toujours présente
-  // 2. externalConfig  : JSON externe, écrase la base si présent
-  //
-  // On utilise l'opérateur ?? (nullish coalescing) :
-  // "prend la valeur de gauche si elle est non-null/undefined,
-  //  sinon prend la valeur de droite"
-  //
-  // Les paramètres URL individuels (calId, title...) écrasent
-  // tout dans la logique métier en dessous.
   const config = {
     apiKey:           externalConfig?.apiKey           ?? calendarConfig.apiKey,
     masterCalendarId: externalConfig?.masterCalendarId ?? calendarConfig.masterCalendarId,
@@ -233,13 +151,6 @@ export default function App() {
     colorMapping: externalConfig?.colorMapping ?? calendarConfig.colorMapping,
   };
 
-  // CONSTRUCTION DES STYLES INLINE (CSS VARIABLES)
-  //
-  // En CSS, une variable définie en inline style="--cal-primary: red"
-  // a une priorité plus haute que toute règle dans une feuille de style.
-  // Donc si l'URL contient ?primaryColor=%23ff0000, on injecte
-  // "--cal-primary: #ff0000" directement sur le div principal.
-  // Le CSS lit via var(--cal-primary), et tout se met à jour.
   const inlineVars = {};
   if (urlParams.primaryColor) inlineVars["--cal-primary"] = urlParams.primaryColor;
   if (urlParams.bgColor)      inlineVars["--cal-bg"]      = urlParams.bgColor;
@@ -247,7 +158,6 @@ export default function App() {
   if (urlParams.textColor)    inlineVars["--cal-text"]    = urlParams.textColor;
   if (urlParams.fontFamily)   inlineVars["--cal-font"]    = urlParams.fontFamily;
 
-  // Mapping des couleurs (config fusionnée + surcharges URL)
   const activeMapping = { ...config.colorMapping };
   for (const [colorId, newLabel] of Object.entries(urlParams.colorOverrides)) {
     if (activeMapping[colorId]) {
@@ -257,24 +167,23 @@ export default function App() {
     }
   }
 
-  // Titre : ?title= dans l'URL > config externe > calendarConfig
   const headerTitle = urlParams.title || config.header.title;
 
-  // Transformation des événements
+  // ----------------------------------------------------------
+  //  On utilise transformEventData depuis lib/utils.ts
+  //  au lieu de reimplementer la logique localement.
+  //  Cela garantit que l'app de demo et le package npm
+  //  ont un comportement rigoureusement identique.
+  //
+  //  NOTE : transformEventData retourne { display: "none" }
+  //  pour masquer un evenement, contrairement a l'ancienne
+  //  version qui retournait false. Les deux approches
+  //  fonctionnent dans FullCalendar v6.
+  // ----------------------------------------------------------
   const handleEventDataTransform = (eventData) => {
-    const rawColorId = eventData.colorId || "default";
-    const groupInfo  = activeMapping[rawColorId] || activeMapping["default"];
-
-    if (dynamicShow && groupInfo.label !== dynamicShow) return false;
-
-    eventData.backgroundColor = groupInfo.hex;
-    eventData.borderColor     = "white";
-    eventData.textColor       = "white";
-    eventData.groupLabel      = groupInfo.label;
-    return eventData;
+    return transformEventData(eventData, activeMapping, dynamicShow);
   };
 
-  // Rendu des blocs d'événements
   const renderEventContent = (eventInfo) => {
     const { start, end } = eventInfo.event;
     const groupLabel = eventInfo.event.extendedProps?.groupLabel || "G";
@@ -289,14 +198,12 @@ export default function App() {
     );
   };
 
-  // En-tête des colonnes jours
+  // ----------------------------------------------------------
+  //  On utilise JOURS depuis lib/utils.ts
+  //  au lieu de le redefinir localement une troisieme fois.
+  // ----------------------------------------------------------
   const renderDayHeader = (args) => {
-    const jours = {
-      fr: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
-      en: ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
-      mg: ["Alah.", "Alats.", "Tal.", "Alar.", "Alak.", "Zom.", "Sab."],
-    };
-    const noms = jours[dynamicLang] || jours["fr"];
+    const noms = JOURS[dynamicLang] || JOURS["fr"];
     return `${noms[args.date.getDay()]} ${args.date.getDate()}/${args.date.getMonth() + 1}`;
   };
 
@@ -360,9 +267,6 @@ export default function App() {
   );
 }
 
-// Styles pour les écrans de chargement et d'erreur.
-// On les met ici plutôt que dans App.css car ils sont
-// uniquement utilisés dans des cas temporaires/exceptionnels.
 const stylesChargement = {
   container: {
     padding: "40px 20px",
