@@ -25,8 +25,8 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types":   "./dist/index.d.ts",
-      "import":  "./dist/index.es.js",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
     "./dist/kalendar.css": "./dist/kalendar.css"
@@ -40,25 +40,24 @@
     "lib/README.md"
   ],
   "scripts": {
-    "start":          "react-scripts start",
-    "build":          "react-scripts build",
-    "test":           "react-scripts test",
-    "test:lib":       "vitest run --config vitest.config.ts",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "test:lib": "vitest run --config vitest.config.ts",
     "test:lib:watch": "vitest --config vitest.config.ts",
-    "eject":          "react-scripts eject",
-    "build:lib":      "vite build --config vite.config.lib.js",
+    "eject": "react-scripts eject",
+    "build:lib": "vite build --config vite.config.lib.js",
     "prepublishOnly": "pnpm run build:lib"
   },
   "peerDependencies": {
-    "react": ">=17.0.0",
-    "react-dom": ">=17.0.0",
-    "@fullcalendar/react": ">=6.0.0",
+    "@fullcalendar/core": ">=6.0.0",
     "@fullcalendar/daygrid": ">=6.0.0",
-    "@fullcalendar/timegrid": ">=6.0.0",
     "@fullcalendar/google-calendar": ">=6.0.0",
-    "@fullcalendar/core": ">=6.0.0"
+    "@fullcalendar/react": ">=6.0.0",
+    "@fullcalendar/timegrid": ">=6.0.0",
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
   },
-  "dependencies": {},
   "devDependencies": {
     "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
@@ -71,8 +70,9 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@vitest/coverage-v8": "^3.0.0",
     "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/coverage-v8": "^3.2.7",
+    "jsdom": "^30.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-scripts": "5.0.1",
