@@ -6,45 +6,18 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import googleCalendarPlugin from "@fullcalendar/google-calendar";
 import frLocale from "@fullcalendar/core/locales/fr";
 import enLocale from "@fullcalendar/core/locales/en-gb";
-import type { EventInput } from "@fullcalendar/core";
+import type { EventInput, EventContentArg, EventClickArg } from "@fullcalendar/core";
 import { transformEventData, formatDayHeader } from "./utils.js";
+import type {
+  ColorMapping,
+  Lang,
+  KalendarProps,
+  KalendarEventClickPayload,
+} from "./types.js";
 import "./Kalendar.css";
 
-//  Types publics
-export type { Lang } from "./utils.js";
-
-export interface ColorMapping {
-  label: string;
-  hex:   string;
-}
-
-export interface KalendarEventClickPayload {
-  title:   string;
-  start:   Date;
-  end:     Date;
-  group:   string | null;
-  colorId: string | null;
-}
-
-export interface KalendarProps {
-  apiKey:        string;
-  calendarId:    string;
-  theme?:        "light" | "dark";
-  lang?:         "fr" | "en" | "mg";
-  from?:         string;
-  to?:           string;
-  hiddenDays?:   number[];
-  firstDay?:     number;
-  colorMapping?: Record<string, ColorMapping>;
-  group?:        string | null;
-  headerPrefix?: string;
-  headerTitle?:  string;
-  headerRight?:  string;
-  showHeader?:   boolean;
-  style?:        React.CSSProperties & Record<string, string>;
-  className?:    string;
-  onEventClick?: (event: KalendarEventClickPayload) => void;
-}
+//  Re-exports publics
+export type { ColorMapping, Lang, KalendarProps, KalendarEventClickPayload };
 
 //  Constantes
 export const DEFAULT_COLOR_MAPPING: Record<string, ColorMapping> = {
@@ -83,7 +56,7 @@ export function Kalendar({
   onEventClick = undefined,
 }: KalendarProps): React.ReactElement {
 
-  const [currentLang, setCurrentLang] = useState<"fr" | "en" | "mg">(lang);
+  const [currentLang, setCurrentLang] = useState<Lang>(lang);
 
   useEffect(() => { setCurrentLang(lang); }, [lang]);
   useEffect(() => { injectKalendarStyles(); }, []);
@@ -103,14 +76,9 @@ export function Kalendar({
     return transformEventData(eventData, colorMapping, group);
   };
 
-  const renderEventContent = (eventInfo: {
-    event: {
-      start: Date | null;
-      end:   Date | null;
-      title: string;
-      extendedProps: Record<string, unknown>;
-    };
-  }): React.ReactElement => {
+  //  On utilise EventContentArg, le type officiel FullCalendar
+  //  pour le parametre de eventContent.
+  const renderEventContent = (eventInfo: EventContentArg): React.ReactElement => {
     const { start, end } = eventInfo.event;
     const groupLabel = (eventInfo.event.extendedProps?.groupLabel as string) || "";
     const fmt = (d: Date | null): string =>
@@ -126,15 +94,9 @@ export function Kalendar({
     );
   };
 
-  const handleEventClick = (clickInfo: {
-    jsEvent: { preventDefault: () => void };
-    event: {
-      title: string;
-      start: Date | null;
-      end:   Date | null;
-      extendedProps: Record<string, unknown>;
-    };
-  }): void => {
+  //  On utilise EventClickArg, le type officiel FullCalendar
+  //  pour le parametre de eventClick.
+  const handleEventClick = (clickInfo: EventClickArg): void => {
     if (onEventClick) {
       clickInfo.jsEvent.preventDefault();
       onEventClick({

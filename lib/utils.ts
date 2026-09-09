@@ -1,11 +1,10 @@
 //  lib/utils.ts
 //  Fonctions pures extraites de Kalendar.tsx.
 //  Exportees separement pour etre testables en isolation.
-
-import type { ColorMapping } from "./Kalendar.js";
+import type { ColorMapping, Lang } from "./types.js";
 import type { EventInput } from "@fullcalendar/core";
 
-export type Lang = "fr" | "en" | "mg";
+export type { Lang };
 
 export const JOURS: Record<Lang, string[]> = {
   fr: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
