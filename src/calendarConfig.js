@@ -1,24 +1,41 @@
+// ============================================================
+//  calendarConfig.js
+//  Configuration locale de l'application de demo Vercel.
+//
+//  Les valeurs sensibles (cle API, calendarId) sont lues
+//  depuis les variables d'environnement :
+//
+//  En developpement local :
+//    Creer un fichier .env.local a la racine du projet :
+//      REACT_APP_GOOGLE_API_KEY=ta_cle_api
+//      REACT_APP_CALENDAR_ID=ton_calendar_id
+//    .env.local est dans .gitignore et ne sera jamais commite.
+//
+//  Sur Vercel :
+//    Settings → Environment Variables → ajouter les deux
+//    variables ci-dessus. Vercel les injecte automatiquement
+//    lors du build de production.
+//
+//  REACT_APP_ est le prefixe obligatoire de CRA pour exposer
+//  une variable d'environnement au code JavaScript du navigateur.
+//  Sans ce prefixe, la variable reste invisible cote client.
+// ============================================================
+
 export const calendarConfig = {
-  // Clé API Google Calendar
-  apiKey: "AIzaSyCHFTEMzBJXWu5cOz4ADvSq8HhW4-cIz84", 
-  
-  // Textes de l'en-tête
+  apiKey: process.env.REACT_APP_GOOGLE_API_KEY || "",
+
   header: {
-    prefix: "THE",
-    title: "Holidays in Madagascar",
-    dateText: "dim. 21 mai - sam. 27 mai 2023 (Heure normale d'Afrique de l'Est)"
+    prefix:   "THE",
+    title:    "Holidays in Madagascar",
+    dateText: "dim. 21 mai - sam. 27 mai 2023 (Heure normale d'Afrique de l'Est)",
   },
 
-  // LE CALENDRIER MAÎTRE (Le seul qui sera lu par défaut)
-  masterCalendarId: "5a7d67665a2a4f9947883ae151366043ac09e229a04a0381e0b6e2476d1f64d2@group.calendar.google.com", 
-  
-  // LA MATRICE DES COULEURS
-  // Google Calendar attribue un "colorId" (de 1 à 11) à chaque événement coloré.
-  // Si l'événement n'a pas de couleur spécifique, il prendra la valeur "default".
+  masterCalendarId: process.env.REACT_APP_CALENDAR_ID || "",
+
   colorMapping: {
-    "1": { label: "H1", hex: "#0099ff" }, // Correspond à la couleur 1 dans Google
-    "2": { label: "H4", hex: "#ff6600" }, // Correspond à la couleur 2
-    "3": { label: "G3", hex: "#666666" }, // Correspond à la couleur 3
-    "default": { label: "Général", hex: "#333333" } // Si on oublie de mettre une couleur
-  }
+    "1":       { label: "H1",      hex: "#0099ff" },
+    "2":       { label: "H4",      hex: "#ff6600" },
+    "3":       { label: "G3",      hex: "#666666" },
+    "default": { label: "General", hex: "#333333" },
+  },
 };
