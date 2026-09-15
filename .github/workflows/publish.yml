@@ -1,0 +1,64 @@
+#  publish.yml
+#  Workflow GitHub Actions pour la publication automatique
+#  du package npm @najororabiaza/kalendar.
+#
+#  DECLENCHEUR :
+#  Ce workflow se declenche uniquement quand un tag de la
+#  forme v* est pousse sur le depot (ex: v1.2.0, v2.0.0).
+#  Il ne se declenche pas sur les push de code ordinaires.
+#
+#  ETAPES :
+#  1. Checkout du code source
+#  2. Installation de pnpm
+#  3. Installation des dependances
+#  4. Execution des tests unitaires
+#  5. Build du package
+#  6. Publication sur npmjs.com
+#
+#  SECRET REQUIS :
+#  NPM_TOKEN doit etre configure dans :
+#  GitHub → Settings → Secrets and variables → Actions
+#  Ce token est un token npm "Granular Access Token"
+#  avec permission "Read and write" sur le package.
+
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: Test, Build and Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests
+        run: pnpm run test:lib
+
+      - name: Build library
+        run: pnpm run build:lib
+
+      - name: Publish to npm
+        run: pnpm publish --access public --no-git-checks --registry https://registry.npmjs.org
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
